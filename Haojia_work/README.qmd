@@ -9,8 +9,12 @@ date: "`r Sys.Date()`"
 ```{r}
 #| label: load packages and raw data
 #| message: FALSE
+#| warning: FALSE
 
 library(tidyverse)
+# handle missing data
+library(VIM) # visualization
+library(mice) # imputation
 
 # read in raw data
 nnns0 <- read.csv("../NNNS_score_data.csv")
@@ -20,6 +24,7 @@ nnns0 <- read.csv("../NNNS_score_data.csv")
 
 ```{r}
 #| label: data cleaning
+#| results: "hide"
 
 # clean up variable names
 # remove the dots at the end of variable names
@@ -29,6 +34,9 @@ colnames(nnns0) <- gsub("\\.+", "_", colnames(nnns0))
 
 # summary of the data
 summary(nnns0)
+
+# exclude neurologic or airway anomaly
+nnns <- nnns0 |> filter(Neurologic_Complication == 0, AirwayAnomalyYN == 0)
 
 nnns <- nnns0 |>
   
@@ -52,20 +60,15 @@ nnns <- nnns0 |>
       )
     ),
     # for model building purposes, combine the 2 levels w/o arch obstruction
-    Cardiac_Anatomy_collapsed = case_when(
-      Cardiac_Anatomy %in% c(1,3) ~ 1,
-      Cardiac_Anatomy == 2        ~ 2,
-      Cardiac_Anatomy == 4        ~ 3
-    ) |> factor(
-      levels = 1:3,
-      labels = c(
-        "W/o arch obstruction",
-        "Single ventricle w/ arch obstruction",
-        "Two ventricle w/ arch obstruction"
-      )
+    Cardiac_Anatomy_collapsed = fct_collapse(
+      Cardiac_Anatomy,
+      "W/o arch obstruction" = c("Single ventricle w/o arch obstruction", "Two ventricle w/o arch obstruction"),
+      "Single ventricle w/ arch obstruction" = "Single ventricle w/ arch obstruction",
+      "Two ventricle w/ arch obstruction" = "Two ventricle w/ arch obstruction"
     )
   ) |>
   
   # convert date variables to date class
   mutate_at(vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), as_date, format = "%m/%d/%Y")
 ```
+
