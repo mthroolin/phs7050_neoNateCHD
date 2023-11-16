@@ -1,29 +1,71 @@
 ---
-title: ''
-output: html_document
-date: "2023-11-16"
+title: "The Impact of Neurobehavior on Feeding Outcomes in Neonates with CHD"
+author: "Haojia Li"
+format: 
+  gfm: default
+date: "`r Sys.Date()`"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+#| label: load packages and raw data
+#| message: FALSE
+
+library(tidyverse)
+
+# read in raw data
+nnns0 <- read.csv("../NNNS_score_data.csv")
 ```
 
-## R Markdown
+# Data Exploration
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+#| label: data cleaning
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# clean up variable names
+# remove the dots at the end of variable names
+colnames(nnns0) <- gsub("\\.+$", "", colnames(nnns0))
+# replace all the dots in variable names with underscores
+colnames(nnns0) <- gsub("\\.+", "_", colnames(nnns0))
 
-```{r cars}
-summary(cars)
+# summary of the data
+summary(nnns0)
+
+nnns <- nnns0 |>
+  
+  # some binary variables have values of 1/2 or Y/N, recode them to 0/1
+  mutate(
+    Female = as.integer(sex_1_M_2_F == 2),
+    Premature = as.integer(Premature == 1),
+    Extubation_failure = as.integer(Extubation_failure == "Y"),
+    Intubated_Pre_operatively = as.integer(Intubated_Pre_operatively == "Y")
+  ) |>
+  
+  # relabel cardiac anatomy
+  mutate(
+    Cardiac_Anatomy = factor(
+      Cardiac_Anatomy, levels = 1:4,
+      labels = c(
+        "Single ventricle w/o arch obstruction",
+        "Single ventricle w/ arch obstruction",
+        "Two ventricle w/o arch obstruction",
+        "Two ventricle w/ arch obstruction"
+      )
+    ),
+    # for model building purposes, combine the 2 levels w/o arch obstruction
+    Cardiac_Anatomy_collapsed = case_when(
+      Cardiac_Anatomy %in% c(1,3) ~ 1,
+      Cardiac_Anatomy == 2        ~ 2,
+      Cardiac_Anatomy == 4        ~ 3
+    ) |> factor(
+      levels = 1:3,
+      labels = c(
+        "W/o arch obstruction",
+        "Single ventricle w/ arch obstruction",
+        "Two ventricle w/ arch obstruction"
+      )
+    )
+  ) |>
+  
+  # convert date variables to date class
+  mutate_at(vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), as_date, format = "%m/%d/%Y")
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
