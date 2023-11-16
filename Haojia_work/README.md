@@ -34,7 +34,6 @@ nnns <- nnns0 |>
     Female = as.integer(sex_1_M_2_F == 2),
     Premature = as.integer(Premature == 1),
     Extubation_failure = as.integer(Extubation_failure == "Y"),
-    Intubated_Pre_operatively = as.integer(Intubated_Pre_operatively == "Y")
   ) |>
   
   # relabel cardiac anatomy
@@ -59,4 +58,12 @@ nnns <- nnns0 |>
   
   # convert date variables to date class
   mutate_at(vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), as_date, format = "%m/%d/%Y")
+
+# drop variables not of interest
+nnns <- nnns |> select(!c(
+  "sex_1_M_2_F", "Intubated_Pre_operatively",
+  "bypass_used", "bypass_time_min",  
+  "Neurologic_Complication", "AirwayAnomalyYN",
+  "Percent_of_feeds_taken_by_mouth_at_discharge"
+)) 
 ```
