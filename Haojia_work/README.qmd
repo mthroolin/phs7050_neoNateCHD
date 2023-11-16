@@ -20,8 +20,6 @@ library(mice) # imputation
 nnns0 <- read.csv("../NNNS_score_data.csv")
 ```
 
-# Data Exploration
-
 ```{r}
 #| label: data cleaning
 #| results: "hide"
@@ -68,7 +66,10 @@ nnns <- nnns0 |>
   ) |>
   
   # convert date variables to date class
-  mutate_at(vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), as_date, format = "%m/%d/%Y")
+  mutate_at(
+    vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), 
+    as_date, format = "%m/%d/%Y"
+  )
 
 # drop variables not of interest
 nnns <- nnns |> select(!c(
@@ -77,4 +78,53 @@ nnns <- nnns |> select(!c(
   "Neurologic_Complication", "AirwayAnomalyYN",
   "Percent_of_feeds_taken_by_mouth_at_discharge"
 )) 
+```
+
+29 variables had missing values: 13 pre-op NNNS scores, 13 post-op NNNS scores, and 3 date variables.
+
+The date variables are only related to the secondary outcome, so we will explore them later.
+
+```{r}
+#| label: frequency table of missing data
+
+# variables with missing data
+data.frame(nmiss = colSums(is.na(nnns))) |>
+  # only keep variables with missing data
+  filter(nmiss > 0) |>
+  # sort by number of missing data
+  arrange(desc(nmiss)) |>
+  # add percentage
+  mutate(perc = nmiss / nrow(nnns) * 100)
+```
+
+Missing data pattern of pre-op and post-op NNNS scores is shown below.
+Scores with suffix "0" are pre-op scores, and scores with suffix "1" are post-op scores.
+
+```{r}
+#| label: missing data pattern of pre-op and post-op NNNS scores
+#| fig.width: 8
+#| fig.height: 10
+
+nnns_score <- nnns |> select(contains("NNNS"))
+# shorten variable names
+colnames(nnns_score) <- sapply(
+  colnames(nnns_score), 
+  \(x) 
+  # remove the "Pre_/Post_Op_NNNS_" prefix and "_score" suffix
+  # use nchar("_score") to avoid to distinguish upper and lower case
+  str_sub(x, str_locate(x, "NNNS_")[2] + 1, nchar(x) - nchar("_score")) |> 
+    # capitalize the first letter
+    str_to_title() |> 
+    # replace underscore with space
+    str_replace_all("_", " ") |>
+    # add 0/1 suffix to indicate pre-op/post-op
+    paste0(as.integer(str_starts(x, "Post")))
+)
+
+aggr(
+  nnns_score, 
+  col = c("navyblue", "red"), numbers = T, sortVars = F, combined = T,
+  cex.axis = .8, cex.numbers = .8, oma = c(10,0,0,2)
+  )
+
 ```
