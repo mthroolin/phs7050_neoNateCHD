@@ -80,7 +80,7 @@ nnns <- nnns0 |>
     # include infants from birth to 4 weeks old
     # there are two outliers with age at surgery > 30 days
     Age_at_Surgery_days <= 30
-    )
+  )
 
 nnns <- nnns0 |>
   
@@ -295,4 +295,62 @@ nnns |>
     missing_text = "N-Missing"
   ) |>
   add_p()
+```
+
+```{r}
+#| label: margin plot between attention scores and characteristics with significant differences by missingness
+
+marginplot(
+  nnns |> select(Pre_Op_NNNS_attention_score, Pre_Op_NNNS_Regulation_Score),
+  xlab = "Pre-op attention",
+  ylab = "Pre-op regulation"
+)
+
+marginplot(
+  nnns |> select(Pre_Op_NNNS_attention_score, Pre_Op_NNNS_Non_Optimal_Reflexes_Score),
+  xlab = "Pre-op attention",
+  ylab = "Pre-op non-optimal reflexes"
+)
+
+marginplot(
+  nnns |> select(Pre_Op_NNNS_attention_score, Pre_Op_NNNS_Lethargy_Score),
+  xlab = "Pre-op attention",
+  ylab = "Pre-op lethargy"
+)
+
+marginplot(
+  nnns |> select(Post_Op_NNNS_attention_score, Cardiac_Anatomy),
+  xlab = "Post-op attention",
+  ylab = "Cardiac anatomy"
+)
+
+marginplot(
+  nnns |> select(Post_Op_NNNS_attention_score, Length_of_intubation_days),
+  xlab = "Post-op attention",
+  ylab = "Length of intubation in days"
+)
+
+marginplot(
+  nnns |> select(Post_Op_NNNS_attention_score, Post_Op_NNNS_Quality_of_Movement_Score),
+  xlab = "Post-op attention",
+  ylab = "Post-op quality of movement"
+)
+
+marginplot(
+  nnns |> select(Post_Op_NNNS_attention_score, Post_Op_NNNS_Regulation_Score),
+  xlab = "Post-op attention",
+  ylab = "Post-op regulation"
+)
+
+marginplot(
+  nnns |> select(Post_Op_NNNS_attention_score, Post_Op_NNNS_Non_Optimal_Reflexes_Score),
+  xlab = "Post-op attention",
+  ylab = "Post-op non-optimal reflexes"
+)
+
+marginplot(
+  nnns |> select(Post_Op_NNNS_attention_score, Post_Op_NNNS_Excitability_Score),
+  xlab = "Post-op attention",
+  ylab = "Post-op excitability"
+)
 ```
