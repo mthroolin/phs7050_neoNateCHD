@@ -6,15 +6,55 @@ format:
 date: "`r Sys.Date()`"
 ---
 
+# Research Objectives
+
+Study the impact of neonatal attention on feeding outcomes among infants undergoing CHD surgery.
+
+1. Assess the association between NNNS attention score and percentage of feeds taken by mouth at discharge. 
+Investigator's assumption is that lower pre- or post-op attention scores are
+associated with lower percentage of oral feeds at discharge.
+
+2. Assess the association between NNNS attention score and time to achieve full oral feeds. 
+Investigator's assumption is that lower pre- or post-op attention scores are
+associated with longer time to achieve full oral feeds after cardiac surgery.
+
+# Data
+
+Data file: "NNNS_score_data.csv";
+Data dictionary: "NNNS_score_data_dictionary.xlsx".
+
+The raw data contains 129 observations and 44 columns.
+Infants with neurologic or airway anomaly should be excluded from the analysis.
+
+Outcome 1 is the percentage of feeds taken by mouth at discharge, 
+which is bounded by [0,1], with a substantial fraction of the data falling at the boundaries (exactly 0’s and 1’s).
+
+Outcome 2 is the time to achieve full oral feeds after cardiac surgery,
+which is calculated as the time difference in days between the start date of PO feed 
+and either the date of reaching full PO or the date of "not yet full PO".
+Non-missing date of "not yet full PO" indicates censoring.
+
+Besides the predictor, NNNS attention score, the variables of interest include:
+sex, genetic syndrome, age at surgery in days, prematurity, cardiac anatomy,
+length of intubation, length of stay, extubation failure and gastrointestinal complications.
+
+The 12 other NNNS scales, pre-op and post-op, are not of interest in this analysis,
+but could be used as auxiliary variables in the imputation model.
+
+## Data cleaning
+
 ```{r}
 #| label: load packages and raw data
 #| message: FALSE
 #| warning: FALSE
 
 library(tidyverse)
+library(gtsummary)
 # handle missing data
 library(VIM) # visualization
 library(mice) # imputation
+# plot matrix of variables
+library(GGally)
 
 # read in raw data
 nnns0 <- read.csv("../NNNS_score_data.csv")
@@ -33,8 +73,14 @@ colnames(nnns0) <- gsub("\\.+", "_", colnames(nnns0))
 # summary of the data
 summary(nnns0)
 
-# exclude neurologic or airway anomaly
-nnns <- nnns0 |> filter(Neurologic_Complication == 0, AirwayAnomalyYN == 0)
+nnns <- nnns0 |> 
+  filter(
+    # exclude neurologic or airway anomaly
+    Neurologic_Complication == 0, AirwayAnomalyYN == 0,
+    # include infants from birth to 4 weeks old
+    # there are two outliers with age at surgery > 30 days
+    Age_at_Surgery_days <= 30
+    )
 
 nnns <- nnns0 |>
   
@@ -71,18 +117,19 @@ nnns <- nnns0 |>
     as_date, format = "%m/%d/%Y"
   )
 
-# drop variables not of interest
+# drop unnecessary variables
 nnns <- nnns |> select(!c(
-  "sex_1_M_2_F", "Intubated_Pre_operatively",
-  "bypass_used", "bypass_time_min",  
-  "Neurologic_Complication", "AirwayAnomalyYN",
-  "Percent_of_feeds_taken_by_mouth_at_discharge"
+  "sex_1_M_2_F", # use Female instead
+  "Intubated_Pre_operatively", "bypass_used", "bypass_time_min", # not of interest 
+  "Neurologic_Complication", "AirwayAnomalyYN" # already excluded
 )) 
 ```
 
-29 variables had missing values: 13 pre-op NNNS scores, 13 post-op NNNS scores, and 3 date variables.
+## Missing data
 
-The date variables are only related to the secondary outcome, so we will explore them later.
+There are in total of 30 variables with missing values: 
+percentage of oral feed at discharge, 13 pre-op NNNS scores, 13 post-op NNNS scores, and 3 date variables.
+The missing values in the date variables are not real missing values, but rather an indication of censoring.
 
 ```{r}
 #| label: frequency table of missing data
@@ -123,8 +170,128 @@ colnames(nnns_score) <- sapply(
 
 aggr(
   nnns_score, 
-  col = c("navyblue", "red"), numbers = T, sortVars = F, combined = T,
+  col = c("navyblue", "red"), numbers = T, prop = F, sortVars = F, combined = T,
   cex.axis = .8, cex.numbers = .8, oma = c(10,0,0,2)
-  )
+)
 
+```
+
+There are 66 (51.2%) infants with missing pre-op NNNS attention scores, and 
+40 (31.0%) infants with missing post-op NNNS attention scores.
+Missingness in the NNNS attention score may be due to a variety of factors:
+
+a. Infant has sternal precautions, examiner cannot do lifting, crawling etc.
+b. Infant is either too quiet or too active. e.g., too long to response, sleeping, too fussy. 
+c. Examiner error or logistical reasons: e.g. skipped by examiner due to holiday, weekend, forgot. 
+
+```{r}
+#| label: characteristics distribution by missingness in NNNs attention score
+#| warning: FALSE
+
+# missingness in pre-op NNNS attention score
+nnns |> 
+  mutate(na_pre_attention = ifelse(is.na(Pre_Op_NNNS_attention_score), "Missing", "Non-missing")) |>
+  select(
+    na_pre_attention, 
+    Age_at_Surgery_days, Female, Premature,
+    Genetic_Syndrome_or_Chromosomal_Abnormality, Cardiac_Anatomy,
+    GI_Complication, Length_of_Stay_days, Length_of_intubation_days, Extubation_failure,
+    starts_with("Pre_Op_NNNS"), Post_Op_NNNS_attention_score, -Pre_Op_NNNS_attention_score
+  ) |>
+  tbl_summary(
+    by = na_pre_attention,
+    # set the type of NNNs scores to continuous
+    type = list(
+      Pre_Op_NNNS_habituation_score ~ "continuous",
+      Pre_Op_NNNS_handling_score ~ "continuous",
+      Pre_Op_NNNS_Quality_of_Movement_Score ~ "continuous",
+      Pre_Op_NNNS_Regulation_Score ~ "continuous",
+      Pre_Op_NNNS_Non_Optimal_Reflexes_Score ~ "continuous",
+      Pre_Op_NNNS_Stress_Score ~ "continuous",
+      Pre_Op_NNNS_Arousal_Score ~ "continuous",
+      Pre_Op_NNNS_Hypertonic_Score ~ "continuous",
+      Pre_Op_NNNS_Hypotonic_Score ~ "continuous",
+      Pre_Op_NNNS_Asymmetry_Score ~ "continuous",
+      Pre_Op_NNNS_Excitability_Score ~ "continuous",
+      Pre_Op_NNNS_Lethargy_Score ~ "continuous"
+    ),
+    label = list(
+      Age_at_Surgery_days ~ "Age at surgery in days",
+      Genetic_Syndrome_or_Chromosomal_Abnormality ~ "Genetic Syndrome / Chromosomal Abnormality",
+      Cardiac_Anatomy ~ "Cardiac Anatomy",
+      GI_Complication ~ "Gastrointestinal Complication",
+      Length_of_Stay_days ~ "Length of Stay in days",
+      Length_of_intubation_days ~ "Length of intubation in days",
+      Extubation_failure ~ "Extubation failure",
+      Pre_Op_NNNS_habituation_score ~ "Pre-op NNNS habituation",
+      Pre_Op_NNNS_handling_score ~ "Pre-op NNNS handling",
+      Pre_Op_NNNS_Quality_of_Movement_Score ~ "Pre-op NNNS quality of movement",
+      Pre_Op_NNNS_Regulation_Score ~ "Pre-op NNNS regulation",
+      Pre_Op_NNNS_Non_Optimal_Reflexes_Score ~ "Pre-op NNNS non-optimal reflexes",
+      Pre_Op_NNNS_Stress_Score ~ "Pre-op NNNS stress",
+      Pre_Op_NNNS_Arousal_Score ~ "Pre-op NNNS arousal",
+      Pre_Op_NNNS_Hypertonic_Score ~ "Pre-op NNNS hypertonic",
+      Pre_Op_NNNS_Hypotonic_Score ~ "Pre-op NNNS hypotonic",
+      Pre_Op_NNNS_Asymmetry_Score ~ "Pre-op NNNS asymmetry",
+      Pre_Op_NNNS_Excitability_Score ~ "Pre-op NNNS excitability",
+      Pre_Op_NNNS_Lethargy_Score ~ "Pre-op NNNS lethargy"
+    ),
+    missing_text = "N-Missing"
+  ) |>
+  add_p()
+
+
+# missingness in post-op NNNS attention score
+nnns |>
+  mutate(na_post_attention = ifelse(is.na(Post_Op_NNNS_attention_score), "Missing", "Non-missing")) |>
+  select(
+    na_post_attention,
+    Age_at_Surgery_days, Female, Premature,
+    Genetic_Syndrome_or_Chromosomal_Abnormality, Cardiac_Anatomy,
+    GI_Complication, Length_of_Stay_days, Length_of_intubation_days, Extubation_failure,
+    starts_with("Post_Op_NNNS"), Pre_Op_NNNS_attention_score, -Post_Op_NNNS_attention_score
+  ) |>
+  tbl_summary(
+    by = na_post_attention,
+    # set the type of NNNs scores to continuous
+    type = list(
+      Pre_Op_NNNS_attention_score ~ "continuous",
+      Post_Op_NNNS_habituation_score ~ "continuous",
+      Post_Op_NNNS_handling_score ~ "continuous",
+      Post_Op_NNNS_Quality_of_Movement_Score ~ "continuous",
+      Post_Op_NNNS_Regulation_Score ~ "continuous",
+      Post_Op_NNNS_Non_Optimal_Reflexes_Score ~ "continuous",
+      Post_Op_NNNS_Stress_Score ~ "continuous",
+      Post_Op_NNNS_Arousal_Score ~ "continuous",
+      Post_Op_NNNS_Hypertonic_Score ~ "continuous",
+      Post_Op_NNNS_Hypotonic_Score ~ "continuous",
+      Post_Op_NNNS_Asymmetry_Score ~ "continuous",
+      Post_Op_NNNS_Excitability_Score ~ "continuous",
+      Post_Op_NNNS_Lethargy_Score ~ "continuous"
+    ),
+    label = list(
+      Age_at_Surgery_days ~ "Age at surgery in days",
+      Genetic_Syndrome_or_Chromosomal_Abnormality ~ "Genetic Syndrome / Chromosomal Abnormality",
+      Cardiac_Anatomy ~ "Cardiac Anatomy",
+      GI_Complication ~ "Gastrointestinal Complication",
+      Length_of_Stay_days ~ "Length of Stay in days",
+      Length_of_intubation_days ~ "Length of intubation in days",
+      Extubation_failure ~ "Extubation failure",
+      Pre_Op_NNNS_attention_score ~ "Pre-op NNNS attention",
+      Post_Op_NNNS_habituation_score ~ "Post-op NNNS habituation",
+      Post_Op_NNNS_handling_score ~ "Post-op NNNS handling",
+      Post_Op_NNNS_Quality_of_Movement_Score ~ "Post-op NNNS quality of movement",
+      Post_Op_NNNS_Regulation_Score ~ "Post-op NNNS regulation",
+      Post_Op_NNNS_Non_Optimal_Reflexes_Score ~ "Post-op NNNS non-optimal reflexes",
+      Post_Op_NNNS_Stress_Score ~ "Post-op NNNS stress",
+      Post_Op_NNNS_Arousal_Score ~ "Post-op NNNS arousal",
+      Post_Op_NNNS_Hypertonic_Score ~ "Post-op NNNS hypertonic",
+      Post_Op_NNNS_Hypotonic_Score ~ "Post-op NNNS hypotonic",
+      Post_Op_NNNS_Asymmetry_Score ~ "Post-op NNNS asymmetry",
+      Post_Op_NNNS_Excitability_Score ~ "Post-op NNNS excitability",
+      Post_Op_NNNS_Lethargy_Score ~ "Post-op NNNS lethargy"
+    ),
+    missing_text = "N-Missing"
+  ) |>
+  add_p()
 ```
