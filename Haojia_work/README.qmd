@@ -187,6 +187,7 @@ c. Examiner error or logistical reasons: e.g. skipped by examiner due to holiday
 ```{r}
 #| label: characteristics distribution by missingness in NNNs attention score
 #| warning: FALSE
+#| results: 'asis'
 
 # missingness in pre-op NNNS attention score
 nnns |> 
