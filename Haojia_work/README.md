@@ -1,6 +1,6 @@
 # The Impact of Neurobehavior on Feeding Outcomes in Neonates with CHD
 Haojia Li
-2023-11-20
+2023-11-29
 
 # Research Objectives
 
@@ -78,7 +78,7 @@ nnns <- nnns0 |>
     Age_at_Surgery_days <= 30
   )
 
-nnns <- nnns0 |>
+nnns <- nnns |>
   
   # some binary variables have values of 1/2 or Y/N, recode them to 0/1
   mutate(
@@ -140,36 +140,36 @@ data.frame(nmiss = colSums(is.na(nnns))) |>
 ```
 
                                                  nmiss      perc
-    Date_Identified_as_not_yet_full_PO             104 80.620155
-    Post_Op_NNNS_habituation_score                  94 72.868217
-    Pre_Op_NNNS_habituation_score                   93 72.093023
-    Pre_Op_NNNS_attention_score                     66 51.162791
-    Pre_Op_NNNS_handling_score                      57 44.186047
-    Post_Op_NNNS_attention_score                    40 31.007752
-    Pre_Op_NNNS_Regulation_Score                    39 30.232558
-    Pre_Op_NNNS_Stress_Score                        39 30.232558
-    Pre_Op_NNNS_Quality_of_Movement_Score           38 29.457364
-    Pre_Op_NNNS_Non_Optimal_Reflexes_Score          38 29.457364
-    Pre_Op_NNNS_Arousal_Score                       38 29.457364
-    Pre_Op_NNNS_Hypertonic_Score                    38 29.457364
-    Pre_Op_NNNS_Hypotonic_Score                     38 29.457364
-    Pre_Op_NNNS_Asymmetry_Score                     38 29.457364
-    Pre_Op_NNNS_Excitability_Score                  38 29.457364
-    Pre_Op_NNNS_Lethargy_Score                      38 29.457364
-    Post_Op_NNNS_handling_score                     37 28.682171
-    Post_Op_NNNS_Regulation_Score                   31 24.031008
-    Post_Op_NNNS_Quality_of_Movement_Score          30 23.255814
-    Post_Op_NNNS_Non_Optimal_Reflexes_Score         30 23.255814
-    Post_Op_NNNS_Stress_Score                       30 23.255814
-    Post_Op_NNNS_Arousal_Score                      30 23.255814
-    Post_Op_NNNS_Hypertonic_Score                   30 23.255814
-    Post_Op_NNNS_Hypotonic_Score                    30 23.255814
-    Post_Op_NNNS_Asymmetry_Score                    30 23.255814
-    Post_Op_NNNS_Excitability_Score                 30 23.255814
-    Post_Op_NNNS_Lethargy_Score                     30 23.255814
-    Date_Reaching_Full_PO                           29 22.480620
-    Date_PO_feeds_started                            8  6.201550
-    Percent_of_feeds_taken_by_mouth_at_discharge     5  3.875969
+    Date_Identified_as_not_yet_full_PO              92 80.000000
+    Post_Op_NNNS_habituation_score                  85 73.913043
+    Pre_Op_NNNS_habituation_score                   83 72.173913
+    Pre_Op_NNNS_attention_score                     60 52.173913
+    Pre_Op_NNNS_handling_score                      51 44.347826
+    Pre_Op_NNNS_Regulation_Score                    35 30.434783
+    Pre_Op_NNNS_Quality_of_Movement_Score           34 29.565217
+    Pre_Op_NNNS_Non_Optimal_Reflexes_Score          34 29.565217
+    Pre_Op_NNNS_Stress_Score                        34 29.565217
+    Pre_Op_NNNS_Arousal_Score                       34 29.565217
+    Pre_Op_NNNS_Hypertonic_Score                    34 29.565217
+    Pre_Op_NNNS_Hypotonic_Score                     34 29.565217
+    Pre_Op_NNNS_Asymmetry_Score                     34 29.565217
+    Pre_Op_NNNS_Excitability_Score                  34 29.565217
+    Pre_Op_NNNS_Lethargy_Score                      34 29.565217
+    Post_Op_NNNS_attention_score                    33 28.695652
+    Post_Op_NNNS_handling_score                     30 26.086957
+    Date_Reaching_Full_PO                           27 23.478261
+    Post_Op_NNNS_Quality_of_Movement_Score          24 20.869565
+    Post_Op_NNNS_Regulation_Score                   24 20.869565
+    Post_Op_NNNS_Non_Optimal_Reflexes_Score         24 20.869565
+    Post_Op_NNNS_Stress_Score                       24 20.869565
+    Post_Op_NNNS_Arousal_Score                      24 20.869565
+    Post_Op_NNNS_Hypertonic_Score                   24 20.869565
+    Post_Op_NNNS_Hypotonic_Score                    24 20.869565
+    Post_Op_NNNS_Asymmetry_Score                    24 20.869565
+    Post_Op_NNNS_Excitability_Score                 24 20.869565
+    Post_Op_NNNS_Lethargy_Score                     24 20.869565
+    Date_PO_feeds_started                            6  5.217391
+    Percent_of_feeds_taken_by_mouth_at_discharge     5  4.347826
 
 Missing data pattern of pre-op and post-op NNNS scores is shown below.
 Scores with suffix “0” are pre-op scores, and scores with suffix “1” are
@@ -269,20 +269,20 @@ nnns |>
 
 <div class="cell-output-display">
 
-<div id="sqemnuhcou" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#sqemnuhcou table {
+<div id="husthbgdmp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#husthbgdmp table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-&#10;#sqemnuhcou thead, #sqemnuhcou tbody, #sqemnuhcou tfoot, #sqemnuhcou tr, #sqemnuhcou td, #sqemnuhcou th {
+&#10;#husthbgdmp thead, #husthbgdmp tbody, #husthbgdmp tfoot, #husthbgdmp tr, #husthbgdmp td, #husthbgdmp th {
   border-style: none;
 }
-&#10;#sqemnuhcou p {
+&#10;#husthbgdmp p {
   margin: 0;
   padding: 0;
 }
-&#10;#sqemnuhcou .gt_table {
+&#10;#husthbgdmp .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -307,11 +307,11 @@ nnns |>
   border-left-width: 2px;
   border-left-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_caption {
+&#10;#husthbgdmp .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
-&#10;#sqemnuhcou .gt_title {
+&#10;#husthbgdmp .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -322,7 +322,7 @@ nnns |>
   border-bottom-color: #FFFFFF;
   border-bottom-width: 0;
 }
-&#10;#sqemnuhcou .gt_subtitle {
+&#10;#husthbgdmp .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -333,7 +333,7 @@ nnns |>
   border-top-color: #FFFFFF;
   border-top-width: 0;
 }
-&#10;#sqemnuhcou .gt_heading {
+&#10;#husthbgdmp .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -344,12 +344,12 @@ nnns |>
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_bottom_border {
+&#10;#husthbgdmp .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_col_headings {
+&#10;#husthbgdmp .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -363,7 +363,7 @@ nnns |>
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_col_heading {
+&#10;#husthbgdmp .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -382,7 +382,7 @@ nnns |>
   padding-right: 5px;
   overflow-x: hidden;
 }
-&#10;#sqemnuhcou .gt_column_spanner_outer {
+&#10;#husthbgdmp .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -393,13 +393,13 @@ nnns |>
   padding-left: 4px;
   padding-right: 4px;
 }
-&#10;#sqemnuhcou .gt_column_spanner_outer:first-child {
+&#10;#husthbgdmp .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
-&#10;#sqemnuhcou .gt_column_spanner_outer:last-child {
+&#10;#husthbgdmp .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
-&#10;#sqemnuhcou .gt_column_spanner {
+&#10;#husthbgdmp .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -410,10 +410,10 @@ nnns |>
   display: inline-block;
   width: 100%;
 }
-&#10;#sqemnuhcou .gt_spanner_row {
+&#10;#husthbgdmp .gt_spanner_row {
   border-bottom-style: hidden;
 }
-&#10;#sqemnuhcou .gt_group_heading {
+&#10;#husthbgdmp .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -438,7 +438,7 @@ nnns |>
   vertical-align: middle;
   text-align: left;
 }
-&#10;#sqemnuhcou .gt_empty_group_heading {
+&#10;#husthbgdmp .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -452,13 +452,13 @@ nnns |>
   border-bottom-color: #D3D3D3;
   vertical-align: middle;
 }
-&#10;#sqemnuhcou .gt_from_md > :first-child {
+&#10;#husthbgdmp .gt_from_md > :first-child {
   margin-top: 0;
 }
-&#10;#sqemnuhcou .gt_from_md > :last-child {
+&#10;#husthbgdmp .gt_from_md > :last-child {
   margin-bottom: 0;
 }
-&#10;#sqemnuhcou .gt_row {
+&#10;#husthbgdmp .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -476,7 +476,7 @@ nnns |>
   vertical-align: middle;
   overflow-x: hidden;
 }
-&#10;#sqemnuhcou .gt_stub {
+&#10;#husthbgdmp .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -488,7 +488,7 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#sqemnuhcou .gt_stub_row_group {
+&#10;#husthbgdmp .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -501,13 +501,13 @@ nnns |>
   padding-right: 5px;
   vertical-align: top;
 }
-&#10;#sqemnuhcou .gt_row_group_first td {
+&#10;#husthbgdmp .gt_row_group_first td {
   border-top-width: 2px;
 }
-&#10;#sqemnuhcou .gt_row_group_first th {
+&#10;#husthbgdmp .gt_row_group_first th {
   border-top-width: 2px;
 }
-&#10;#sqemnuhcou .gt_summary_row {
+&#10;#husthbgdmp .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -516,14 +516,14 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#sqemnuhcou .gt_first_summary_row {
+&#10;#husthbgdmp .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_first_summary_row.thick {
+&#10;#husthbgdmp .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
-&#10;#sqemnuhcou .gt_last_summary_row {
+&#10;#husthbgdmp .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -532,7 +532,7 @@ nnns |>
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_grand_summary_row {
+&#10;#husthbgdmp .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -541,7 +541,7 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#sqemnuhcou .gt_first_grand_summary_row {
+&#10;#husthbgdmp .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -550,7 +550,7 @@ nnns |>
   border-top-width: 6px;
   border-top-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_last_grand_summary_row_top {
+&#10;#husthbgdmp .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -559,10 +559,10 @@ nnns |>
   border-bottom-width: 6px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_striped {
+&#10;#husthbgdmp .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
-&#10;#sqemnuhcou .gt_table_body {
+&#10;#husthbgdmp .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -570,7 +570,7 @@ nnns |>
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_footnotes {
+&#10;#husthbgdmp .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -583,7 +583,7 @@ nnns |>
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_footnote {
+&#10;#husthbgdmp .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -591,7 +591,7 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#sqemnuhcou .gt_sourcenotes {
+&#10;#husthbgdmp .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -604,57 +604,57 @@ nnns |>
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#sqemnuhcou .gt_sourcenote {
+&#10;#husthbgdmp .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#sqemnuhcou .gt_left {
+&#10;#husthbgdmp .gt_left {
   text-align: left;
 }
-&#10;#sqemnuhcou .gt_center {
+&#10;#husthbgdmp .gt_center {
   text-align: center;
 }
-&#10;#sqemnuhcou .gt_right {
+&#10;#husthbgdmp .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-&#10;#sqemnuhcou .gt_font_normal {
+&#10;#husthbgdmp .gt_font_normal {
   font-weight: normal;
 }
-&#10;#sqemnuhcou .gt_font_bold {
+&#10;#husthbgdmp .gt_font_bold {
   font-weight: bold;
 }
-&#10;#sqemnuhcou .gt_font_italic {
+&#10;#husthbgdmp .gt_font_italic {
   font-style: italic;
 }
-&#10;#sqemnuhcou .gt_super {
+&#10;#husthbgdmp .gt_super {
   font-size: 65%;
 }
-&#10;#sqemnuhcou .gt_footnote_marks {
+&#10;#husthbgdmp .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
-&#10;#sqemnuhcou .gt_asterisk {
+&#10;#husthbgdmp .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
-&#10;#sqemnuhcou .gt_indent_1 {
+&#10;#husthbgdmp .gt_indent_1 {
   text-indent: 5px;
 }
-&#10;#sqemnuhcou .gt_indent_2 {
+&#10;#husthbgdmp .gt_indent_2 {
   text-indent: 10px;
 }
-&#10;#sqemnuhcou .gt_indent_3 {
+&#10;#husthbgdmp .gt_indent_3 {
   text-indent: 15px;
 }
-&#10;#sqemnuhcou .gt_indent_4 {
+&#10;#husthbgdmp .gt_indent_4 {
   text-indent: 20px;
 }
-&#10;#sqemnuhcou .gt_indent_5 {
+&#10;#husthbgdmp .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -662,142 +662,142 @@ nnns |>
   <thead>
     &#10;    <tr class="gt_col_headings">
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Characteristic&lt;/strong&gt;"><strong>Characteristic</strong></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Missing&lt;/strong&gt;, N = 66&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Missing</strong>, N = 66<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Non-missing&lt;/strong&gt;, N = 63&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Non-missing</strong>, N = 63<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Missing&lt;/strong&gt;, N = 60&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Missing</strong>, N = 60<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Non-missing&lt;/strong&gt;, N = 55&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Non-missing</strong>, N = 55<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
       <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;p-value&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/span&gt;"><strong>p-value</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>2</sup></span></th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
     <tr><td headers="label" class="gt_row gt_left">Age at surgery in days</td>
-<td headers="stat_1" class="gt_row gt_center">7 (5, 10)</td>
+<td headers="stat_1" class="gt_row gt_center">7 (5, 9)</td>
 <td headers="stat_2" class="gt_row gt_center">7 (5, 10)</td>
-<td headers="p.value" class="gt_row gt_center">0.7</td></tr>
-    <tr><td headers="label" class="gt_row gt_left">Female</td>
-<td headers="stat_1" class="gt_row gt_center">26 (39%)</td>
-<td headers="stat_2" class="gt_row gt_center">26 (41%)</td>
 <td headers="p.value" class="gt_row gt_center">0.8</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Female</td>
+<td headers="stat_1" class="gt_row gt_center">22 (37%)</td>
+<td headers="stat_2" class="gt_row gt_center">23 (42%)</td>
+<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Premature</td>
-<td headers="stat_1" class="gt_row gt_center">59 (89%)</td>
-<td headers="stat_2" class="gt_row gt_center">54 (86%)</td>
+<td headers="stat_1" class="gt_row gt_center">54 (90%)</td>
+<td headers="stat_2" class="gt_row gt_center">47 (85%)</td>
 <td headers="p.value" class="gt_row gt_center">0.5</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Genetic Syndrome / Chromosomal Abnormality</td>
-<td headers="stat_1" class="gt_row gt_center">15 (23%)</td>
-<td headers="stat_2" class="gt_row gt_center">9 (14%)</td>
-<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
+<td headers="stat_1" class="gt_row gt_center">15 (25%)</td>
+<td headers="stat_2" class="gt_row gt_center">9 (16%)</td>
+<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Cardiac Anatomy</td>
 <td headers="stat_1" class="gt_row gt_center"></td>
 <td headers="stat_2" class="gt_row gt_center"></td>
-<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.8</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Single ventricle w/o arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">4 (6.1%)</td>
-<td headers="stat_2" class="gt_row gt_center">6 (9.5%)</td>
+<td headers="stat_1" class="gt_row gt_center">3 (5.0%)</td>
+<td headers="stat_2" class="gt_row gt_center">4 (7.3%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Single ventricle w/ arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">13 (20%)</td>
-<td headers="stat_2" class="gt_row gt_center">16 (25%)</td>
+<td headers="stat_1" class="gt_row gt_center">13 (22%)</td>
+<td headers="stat_2" class="gt_row gt_center">15 (27%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Two ventricle w/o arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">26 (39%)</td>
-<td headers="stat_2" class="gt_row gt_center">18 (29%)</td>
+<td headers="stat_1" class="gt_row gt_center">24 (40%)</td>
+<td headers="stat_2" class="gt_row gt_center">17 (31%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Two ventricle w/ arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">23 (35%)</td>
-<td headers="stat_2" class="gt_row gt_center">23 (37%)</td>
+<td headers="stat_1" class="gt_row gt_center">20 (33%)</td>
+<td headers="stat_2" class="gt_row gt_center">19 (35%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Gastrointestinal Complication</td>
-<td headers="stat_1" class="gt_row gt_center">8 (12%)</td>
-<td headers="stat_2" class="gt_row gt_center">4 (6.3%)</td>
+<td headers="stat_1" class="gt_row gt_center">8 (13%)</td>
+<td headers="stat_2" class="gt_row gt_center">4 (7.3%)</td>
 <td headers="p.value" class="gt_row gt_center">0.3</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Length of Stay in days</td>
-<td headers="stat_1" class="gt_row gt_center">25 (18, 34)</td>
-<td headers="stat_2" class="gt_row gt_center">21 (17, 28)</td>
-<td headers="p.value" class="gt_row gt_center">0.14</td></tr>
+<td headers="stat_1" class="gt_row gt_center">25 (18, 33)</td>
+<td headers="stat_2" class="gt_row gt_center">22 (18, 28)</td>
+<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Length of intubation in days</td>
-<td headers="stat_1" class="gt_row gt_center">5.00 (3.80, 6.88)</td>
-<td headers="stat_2" class="gt_row gt_center">4.90 (3.00, 6.10)</td>
+<td headers="stat_1" class="gt_row gt_center">5.00 (4.08, 6.83)</td>
+<td headers="stat_2" class="gt_row gt_center">4.90 (3.10, 6.10)</td>
 <td headers="p.value" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Extubation failure</td>
-<td headers="stat_1" class="gt_row gt_center">7 (11%)</td>
-<td headers="stat_2" class="gt_row gt_center">5 (7.9%)</td>
-<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+<td headers="stat_1" class="gt_row gt_center">7 (12%)</td>
+<td headers="stat_2" class="gt_row gt_center">4 (7.3%)</td>
+<td headers="p.value" class="gt_row gt_center">0.4</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS habituation</td>
 <td headers="stat_1" class="gt_row gt_center">9.00 (7.00, 9.00)</td>
-<td headers="stat_2" class="gt_row gt_center">8.50 (7.54, 9.00)</td>
-<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+<td headers="stat_2" class="gt_row gt_center">8.50 (7.08, 9.00)</td>
+<td headers="p.value" class="gt_row gt_center">0.7</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">52</td>
-<td headers="stat_2" class="gt_row gt_center">41</td>
+<td headers="stat_1" class="gt_row gt_center">47</td>
+<td headers="stat_2" class="gt_row gt_center">36</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS handling</td>
 <td headers="stat_1" class="gt_row gt_center">0.38 (0.38, 0.50)</td>
 <td headers="stat_2" class="gt_row gt_center">0.38 (0.25, 0.50)</td>
 <td headers="p.value" class="gt_row gt_center">>0.9</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">57</td>
+<td headers="stat_1" class="gt_row gt_center">51</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS quality of movement</td>
-<td headers="stat_1" class="gt_row gt_center">4.45 (4.17, 4.71)</td>
-<td headers="stat_2" class="gt_row gt_center">4.67 (4.17, 5.00)</td>
-<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
+<td headers="stat_1" class="gt_row gt_center">4.37 (4.17, 4.67)</td>
+<td headers="stat_2" class="gt_row gt_center">4.80 (4.17, 5.00)</td>
+<td headers="p.value" class="gt_row gt_center">0.063</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS regulation</td>
-<td headers="stat_1" class="gt_row gt_center">4.64 (4.00, 4.86)</td>
-<td headers="stat_2" class="gt_row gt_center">4.93 (4.50, 5.35)</td>
-<td headers="p.value" class="gt_row gt_center">0.009</td></tr>
+<td headers="stat_1" class="gt_row gt_center">4.64 (4.00, 4.80)</td>
+<td headers="stat_2" class="gt_row gt_center">4.86 (4.50, 5.29)</td>
+<td headers="p.value" class="gt_row gt_center">0.015</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">39</td>
+<td headers="stat_1" class="gt_row gt_center">35</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS non-optimal reflexes</td>
 <td headers="stat_1" class="gt_row gt_center">7 (6, 8)</td>
 <td headers="stat_2" class="gt_row gt_center">5 (4, 7)</td>
-<td headers="p.value" class="gt_row gt_center">0.002</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.007</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS stress</td>
-<td headers="stat_1" class="gt_row gt_center">0.06 (0.04, 0.07)</td>
-<td headers="stat_2" class="gt_row gt_center">0.05 (0.02, 0.06)</td>
-<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+<td headers="stat_1" class="gt_row gt_center">0.06 (0.04, 0.06)</td>
+<td headers="stat_2" class="gt_row gt_center">0.04 (0.02, 0.06)</td>
+<td headers="p.value" class="gt_row gt_center">0.4</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
-<td headers="stat_2" class="gt_row gt_center">1</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
+<td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS arousal</td>
-<td headers="stat_1" class="gt_row gt_center">3.57 (3.11, 3.86)</td>
+<td headers="stat_1" class="gt_row gt_center">3.64 (3.14, 3.86)</td>
 <td headers="stat_2" class="gt_row gt_center">3.71 (3.29, 4.00)</td>
 <td headers="p.value" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS hypertonic</td>
 <td headers="stat_1" class="gt_row gt_center">0 (0, 1)</td>
 <td headers="stat_2" class="gt_row gt_center">0 (0, 0)</td>
-<td headers="p.value" class="gt_row gt_center">0.12</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.082</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS hypotonic</td>
 <td headers="stat_1" class="gt_row gt_center">1 (0, 1)</td>
-<td headers="stat_2" class="gt_row gt_center">0 (0, 1)</td>
-<td headers="p.value" class="gt_row gt_center">0.13</td></tr>
+<td headers="stat_2" class="gt_row gt_center">1 (0, 1)</td>
+<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS asymmetry</td>
 <td headers="stat_1" class="gt_row gt_center">1 (0, 1)</td>
 <td headers="stat_2" class="gt_row gt_center">1 (0, 1)</td>
-<td headers="p.value" class="gt_row gt_center">0.8</td></tr>
+<td headers="p.value" class="gt_row gt_center">>0.9</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS excitability</td>
@@ -805,24 +805,24 @@ nnns |>
 <td headers="stat_2" class="gt_row gt_center">3 (2, 4)</td>
 <td headers="p.value" class="gt_row gt_center">>0.9</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS lethargy</td>
 <td headers="stat_1" class="gt_row gt_center">6 (5, 6)</td>
 <td headers="stat_2" class="gt_row gt_center">7 (5, 9)</td>
-<td headers="p.value" class="gt_row gt_center">0.045</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.042</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">38</td>
+<td headers="stat_1" class="gt_row gt_center">34</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post_Op_NNNS_attention_score</td>
-<td headers="stat_1" class="gt_row gt_center">4.43 (4.00, 5.14)</td>
-<td headers="stat_2" class="gt_row gt_center">4.29 (3.71, 4.64)</td>
-<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
+<td headers="stat_1" class="gt_row gt_center">4.43 (3.86, 5.00)</td>
+<td headers="stat_2" class="gt_row gt_center">4.29 (3.71, 4.71)</td>
+<td headers="p.value" class="gt_row gt_center">0.4</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">16</td>
-<td headers="stat_2" class="gt_row gt_center">24</td>
+<td headers="stat_1" class="gt_row gt_center">15</td>
+<td headers="stat_2" class="gt_row gt_center">18</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
   </tbody>
   &#10;  <tfoot class="gt_footnotes">
@@ -896,20 +896,20 @@ nnns |>
 
 <div class="cell-output-display">
 
-<div id="etijrbjgqr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#etijrbjgqr table {
+<div id="zfovjxuytw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#zfovjxuytw table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-&#10;#etijrbjgqr thead, #etijrbjgqr tbody, #etijrbjgqr tfoot, #etijrbjgqr tr, #etijrbjgqr td, #etijrbjgqr th {
+&#10;#zfovjxuytw thead, #zfovjxuytw tbody, #zfovjxuytw tfoot, #zfovjxuytw tr, #zfovjxuytw td, #zfovjxuytw th {
   border-style: none;
 }
-&#10;#etijrbjgqr p {
+&#10;#zfovjxuytw p {
   margin: 0;
   padding: 0;
 }
-&#10;#etijrbjgqr .gt_table {
+&#10;#zfovjxuytw .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -934,11 +934,11 @@ nnns |>
   border-left-width: 2px;
   border-left-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_caption {
+&#10;#zfovjxuytw .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
-&#10;#etijrbjgqr .gt_title {
+&#10;#zfovjxuytw .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -949,7 +949,7 @@ nnns |>
   border-bottom-color: #FFFFFF;
   border-bottom-width: 0;
 }
-&#10;#etijrbjgqr .gt_subtitle {
+&#10;#zfovjxuytw .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -960,7 +960,7 @@ nnns |>
   border-top-color: #FFFFFF;
   border-top-width: 0;
 }
-&#10;#etijrbjgqr .gt_heading {
+&#10;#zfovjxuytw .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -971,12 +971,12 @@ nnns |>
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_bottom_border {
+&#10;#zfovjxuytw .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_col_headings {
+&#10;#zfovjxuytw .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -990,7 +990,7 @@ nnns |>
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_col_heading {
+&#10;#zfovjxuytw .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1009,7 +1009,7 @@ nnns |>
   padding-right: 5px;
   overflow-x: hidden;
 }
-&#10;#etijrbjgqr .gt_column_spanner_outer {
+&#10;#zfovjxuytw .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1020,13 +1020,13 @@ nnns |>
   padding-left: 4px;
   padding-right: 4px;
 }
-&#10;#etijrbjgqr .gt_column_spanner_outer:first-child {
+&#10;#zfovjxuytw .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
-&#10;#etijrbjgqr .gt_column_spanner_outer:last-child {
+&#10;#zfovjxuytw .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
-&#10;#etijrbjgqr .gt_column_spanner {
+&#10;#zfovjxuytw .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1037,10 +1037,10 @@ nnns |>
   display: inline-block;
   width: 100%;
 }
-&#10;#etijrbjgqr .gt_spanner_row {
+&#10;#zfovjxuytw .gt_spanner_row {
   border-bottom-style: hidden;
 }
-&#10;#etijrbjgqr .gt_group_heading {
+&#10;#zfovjxuytw .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1065,7 +1065,7 @@ nnns |>
   vertical-align: middle;
   text-align: left;
 }
-&#10;#etijrbjgqr .gt_empty_group_heading {
+&#10;#zfovjxuytw .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1079,13 +1079,13 @@ nnns |>
   border-bottom-color: #D3D3D3;
   vertical-align: middle;
 }
-&#10;#etijrbjgqr .gt_from_md > :first-child {
+&#10;#zfovjxuytw .gt_from_md > :first-child {
   margin-top: 0;
 }
-&#10;#etijrbjgqr .gt_from_md > :last-child {
+&#10;#zfovjxuytw .gt_from_md > :last-child {
   margin-bottom: 0;
 }
-&#10;#etijrbjgqr .gt_row {
+&#10;#zfovjxuytw .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1103,7 +1103,7 @@ nnns |>
   vertical-align: middle;
   overflow-x: hidden;
 }
-&#10;#etijrbjgqr .gt_stub {
+&#10;#zfovjxuytw .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1115,7 +1115,7 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#etijrbjgqr .gt_stub_row_group {
+&#10;#zfovjxuytw .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1128,13 +1128,13 @@ nnns |>
   padding-right: 5px;
   vertical-align: top;
 }
-&#10;#etijrbjgqr .gt_row_group_first td {
+&#10;#zfovjxuytw .gt_row_group_first td {
   border-top-width: 2px;
 }
-&#10;#etijrbjgqr .gt_row_group_first th {
+&#10;#zfovjxuytw .gt_row_group_first th {
   border-top-width: 2px;
 }
-&#10;#etijrbjgqr .gt_summary_row {
+&#10;#zfovjxuytw .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1143,14 +1143,14 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#etijrbjgqr .gt_first_summary_row {
+&#10;#zfovjxuytw .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_first_summary_row.thick {
+&#10;#zfovjxuytw .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
-&#10;#etijrbjgqr .gt_last_summary_row {
+&#10;#zfovjxuytw .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1159,7 +1159,7 @@ nnns |>
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_grand_summary_row {
+&#10;#zfovjxuytw .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1168,7 +1168,7 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#etijrbjgqr .gt_first_grand_summary_row {
+&#10;#zfovjxuytw .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1177,7 +1177,7 @@ nnns |>
   border-top-width: 6px;
   border-top-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_last_grand_summary_row_top {
+&#10;#zfovjxuytw .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1186,10 +1186,10 @@ nnns |>
   border-bottom-width: 6px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_striped {
+&#10;#zfovjxuytw .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
-&#10;#etijrbjgqr .gt_table_body {
+&#10;#zfovjxuytw .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1197,7 +1197,7 @@ nnns |>
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_footnotes {
+&#10;#zfovjxuytw .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1210,7 +1210,7 @@ nnns |>
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_footnote {
+&#10;#zfovjxuytw .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1218,7 +1218,7 @@ nnns |>
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#etijrbjgqr .gt_sourcenotes {
+&#10;#zfovjxuytw .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1231,57 +1231,57 @@ nnns |>
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#etijrbjgqr .gt_sourcenote {
+&#10;#zfovjxuytw .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#etijrbjgqr .gt_left {
+&#10;#zfovjxuytw .gt_left {
   text-align: left;
 }
-&#10;#etijrbjgqr .gt_center {
+&#10;#zfovjxuytw .gt_center {
   text-align: center;
 }
-&#10;#etijrbjgqr .gt_right {
+&#10;#zfovjxuytw .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-&#10;#etijrbjgqr .gt_font_normal {
+&#10;#zfovjxuytw .gt_font_normal {
   font-weight: normal;
 }
-&#10;#etijrbjgqr .gt_font_bold {
+&#10;#zfovjxuytw .gt_font_bold {
   font-weight: bold;
 }
-&#10;#etijrbjgqr .gt_font_italic {
+&#10;#zfovjxuytw .gt_font_italic {
   font-style: italic;
 }
-&#10;#etijrbjgqr .gt_super {
+&#10;#zfovjxuytw .gt_super {
   font-size: 65%;
 }
-&#10;#etijrbjgqr .gt_footnote_marks {
+&#10;#zfovjxuytw .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
-&#10;#etijrbjgqr .gt_asterisk {
+&#10;#zfovjxuytw .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
-&#10;#etijrbjgqr .gt_indent_1 {
+&#10;#zfovjxuytw .gt_indent_1 {
   text-indent: 5px;
 }
-&#10;#etijrbjgqr .gt_indent_2 {
+&#10;#zfovjxuytw .gt_indent_2 {
   text-indent: 10px;
 }
-&#10;#etijrbjgqr .gt_indent_3 {
+&#10;#zfovjxuytw .gt_indent_3 {
   text-indent: 15px;
 }
-&#10;#etijrbjgqr .gt_indent_4 {
+&#10;#zfovjxuytw .gt_indent_4 {
   text-indent: 20px;
 }
-&#10;#etijrbjgqr .gt_indent_5 {
+&#10;#zfovjxuytw .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1289,126 +1289,126 @@ nnns |>
   <thead>
     &#10;    <tr class="gt_col_headings">
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Characteristic&lt;/strong&gt;"><strong>Characteristic</strong></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Missing&lt;/strong&gt;, N = 40&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Missing</strong>, N = 40<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Non-missing&lt;/strong&gt;, N = 89&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Non-missing</strong>, N = 89<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Missing&lt;/strong&gt;, N = 33&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Missing</strong>, N = 33<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;Non-missing&lt;/strong&gt;, N = 82&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;"><strong>Non-missing</strong>, N = 82<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
       <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="&lt;strong&gt;p-value&lt;/strong&gt;&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/span&gt;"><strong>p-value</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>2</sup></span></th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
     <tr><td headers="label" class="gt_row gt_left">Age at surgery in days</td>
 <td headers="stat_1" class="gt_row gt_center">8 (6, 11)</td>
-<td headers="stat_2" class="gt_row gt_center">7 (5, 10)</td>
-<td headers="p.value" class="gt_row gt_center">0.14</td></tr>
+<td headers="stat_2" class="gt_row gt_center">7 (4, 8)</td>
+<td headers="p.value" class="gt_row gt_center">0.046</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Female</td>
-<td headers="stat_1" class="gt_row gt_center">16 (40%)</td>
-<td headers="stat_2" class="gt_row gt_center">36 (40%)</td>
+<td headers="stat_1" class="gt_row gt_center">13 (39%)</td>
+<td headers="stat_2" class="gt_row gt_center">32 (39%)</td>
 <td headers="p.value" class="gt_row gt_center">>0.9</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Premature</td>
-<td headers="stat_1" class="gt_row gt_center">33 (83%)</td>
-<td headers="stat_2" class="gt_row gt_center">80 (90%)</td>
-<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
+<td headers="stat_1" class="gt_row gt_center">28 (85%)</td>
+<td headers="stat_2" class="gt_row gt_center">73 (89%)</td>
+<td headers="p.value" class="gt_row gt_center">0.5</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Genetic Syndrome / Chromosomal Abnormality</td>
-<td headers="stat_1" class="gt_row gt_center">8 (20%)</td>
-<td headers="stat_2" class="gt_row gt_center">16 (18%)</td>
-<td headers="p.value" class="gt_row gt_center">0.8</td></tr>
+<td headers="stat_1" class="gt_row gt_center">8 (24%)</td>
+<td headers="stat_2" class="gt_row gt_center">16 (20%)</td>
+<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Cardiac Anatomy</td>
 <td headers="stat_1" class="gt_row gt_center"></td>
 <td headers="stat_2" class="gt_row gt_center"></td>
-<td headers="p.value" class="gt_row gt_center">0.019</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.046</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Single ventricle w/o arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">3 (7.5%)</td>
-<td headers="stat_2" class="gt_row gt_center">7 (7.9%)</td>
+<td headers="stat_1" class="gt_row gt_center">1 (3.0%)</td>
+<td headers="stat_2" class="gt_row gt_center">6 (7.3%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Single ventricle w/ arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">3 (7.5%)</td>
-<td headers="stat_2" class="gt_row gt_center">26 (29%)</td>
+<td headers="stat_1" class="gt_row gt_center">3 (9.1%)</td>
+<td headers="stat_2" class="gt_row gt_center">25 (30%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Two ventricle w/o arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">14 (35%)</td>
-<td headers="stat_2" class="gt_row gt_center">30 (34%)</td>
+<td headers="stat_1" class="gt_row gt_center">14 (42%)</td>
+<td headers="stat_2" class="gt_row gt_center">27 (33%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">    Two ventricle w/ arch obstruction</td>
-<td headers="stat_1" class="gt_row gt_center">20 (50%)</td>
-<td headers="stat_2" class="gt_row gt_center">26 (29%)</td>
+<td headers="stat_1" class="gt_row gt_center">15 (45%)</td>
+<td headers="stat_2" class="gt_row gt_center">24 (29%)</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Gastrointestinal Complication</td>
-<td headers="stat_1" class="gt_row gt_center">2 (5.0%)</td>
-<td headers="stat_2" class="gt_row gt_center">10 (11%)</td>
-<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
+<td headers="stat_1" class="gt_row gt_center">2 (6.1%)</td>
+<td headers="stat_2" class="gt_row gt_center">10 (12%)</td>
+<td headers="p.value" class="gt_row gt_center">0.5</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Length of Stay in days</td>
-<td headers="stat_1" class="gt_row gt_center">19 (14, 30)</td>
+<td headers="stat_1" class="gt_row gt_center">23 (16, 31)</td>
 <td headers="stat_2" class="gt_row gt_center">23 (18, 32)</td>
-<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.5</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Length of intubation in days</td>
-<td headers="stat_1" class="gt_row gt_center">3.60 (1.90, 5.80)</td>
-<td headers="stat_2" class="gt_row gt_center">5.00 (4.20, 6.80)</td>
+<td headers="stat_1" class="gt_row gt_center">3.70 (2.70, 5.80)</td>
+<td headers="stat_2" class="gt_row gt_center">5.10 (4.50, 6.88)</td>
 <td headers="p.value" class="gt_row gt_center"><0.001</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Extubation failure</td>
-<td headers="stat_1" class="gt_row gt_center">2 (5.0%)</td>
-<td headers="stat_2" class="gt_row gt_center">10 (11%)</td>
-<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
+<td headers="stat_1" class="gt_row gt_center">2 (6.1%)</td>
+<td headers="stat_2" class="gt_row gt_center">9 (11%)</td>
+<td headers="p.value" class="gt_row gt_center">0.5</td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS habituation</td>
-<td headers="stat_1" class="gt_row gt_center">8.50 (8.00, 9.00)</td>
-<td headers="stat_2" class="gt_row gt_center">9.00 (7.50, 9.00)</td>
-<td headers="p.value" class="gt_row gt_center">>0.9</td></tr>
+<td headers="stat_1" class="gt_row gt_center">9.00 (8.00, 9.00)</td>
+<td headers="stat_2" class="gt_row gt_center">9.00 (6.50, 9.00)</td>
+<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">32</td>
-<td headers="stat_2" class="gt_row gt_center">62</td>
+<td headers="stat_1" class="gt_row gt_center">26</td>
+<td headers="stat_2" class="gt_row gt_center">59</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS handling</td>
 <td headers="stat_1" class="gt_row gt_center">0.38 (0.19, 0.59)</td>
 <td headers="stat_2" class="gt_row gt_center">0.38 (0.13, 0.50)</td>
 <td headers="p.value" class="gt_row gt_center">0.8</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">36</td>
+<td headers="stat_1" class="gt_row gt_center">29</td>
 <td headers="stat_2" class="gt_row gt_center">1</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS quality of movement</td>
-<td headers="stat_1" class="gt_row gt_center">4.20 (4.05, 4.38)</td>
-<td headers="stat_2" class="gt_row gt_center">4.60 (4.17, 5.00)</td>
-<td headers="p.value" class="gt_row gt_center">0.051</td></tr>
+<td headers="stat_1" class="gt_row gt_center">4.20 (4.00, 4.40)</td>
+<td headers="stat_2" class="gt_row gt_center">4.67 (4.17, 5.00)</td>
+<td headers="p.value" class="gt_row gt_center">0.050</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS regulation</td>
 <td headers="stat_1" class="gt_row gt_center">3.67 (3.46, 4.13)</td>
-<td headers="stat_2" class="gt_row gt_center">5.00 (4.57, 5.38)</td>
+<td headers="stat_2" class="gt_row gt_center">5.00 (4.52, 5.31)</td>
 <td headers="p.value" class="gt_row gt_center"><0.001</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">31</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS non-optimal reflexes</td>
-<td headers="stat_1" class="gt_row gt_center">3 (2, 4)</td>
+<td headers="stat_1" class="gt_row gt_center">2 (2, 4)</td>
 <td headers="stat_2" class="gt_row gt_center">2 (1, 3)</td>
-<td headers="p.value" class="gt_row gt_center">0.016</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.035</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS stress</td>
 <td headers="stat_1" class="gt_row gt_center">0.08 (0.06, 0.10)</td>
-<td headers="stat_2" class="gt_row gt_center">0.06 (0.02, 0.08)</td>
+<td headers="stat_2" class="gt_row gt_center">0.06 (0.03, 0.08)</td>
 <td headers="p.value" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS arousal</td>
-<td headers="stat_1" class="gt_row gt_center">3.64 (2.86, 4.26)</td>
+<td headers="stat_1" class="gt_row gt_center">3.71 (3.29, 4.29)</td>
 <td headers="stat_2" class="gt_row gt_center">3.57 (3.29, 3.86)</td>
-<td headers="p.value" class="gt_row gt_center">0.7</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.4</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS hypertonic</td>
 <td headers="stat_1" class="gt_row gt_center">0 (0, 0)</td>
 <td headers="stat_2" class="gt_row gt_center">0 (0, 0)</td>
-<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
+<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS hypotonic</td>
@@ -1416,40 +1416,40 @@ nnns |>
 <td headers="stat_2" class="gt_row gt_center">0 (0, 0)</td>
 <td headers="p.value" class="gt_row gt_center">0.2</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS asymmetry</td>
 <td headers="stat_1" class="gt_row gt_center">0 (0, 1)</td>
 <td headers="stat_2" class="gt_row gt_center">0 (0, 1)</td>
-<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+<td headers="p.value" class="gt_row gt_center">>0.9</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS excitability</td>
 <td headers="stat_1" class="gt_row gt_center">6 (5, 7)</td>
 <td headers="stat_2" class="gt_row gt_center">3 (1, 4)</td>
-<td headers="p.value" class="gt_row gt_center">0.004</td></tr>
+<td headers="p.value" class="gt_row gt_center"><0.001</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Post-op NNNS lethargy</td>
-<td headers="stat_1" class="gt_row gt_center">5 (4, 5)</td>
+<td headers="stat_1" class="gt_row gt_center">4 (4, 5)</td>
 <td headers="stat_2" class="gt_row gt_center">5 (4, 7)</td>
 <td headers="p.value" class="gt_row gt_center">0.3</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">30</td>
+<td headers="stat_1" class="gt_row gt_center">24</td>
 <td headers="stat_2" class="gt_row gt_center">0</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
     <tr><td headers="label" class="gt_row gt_left">Pre-op NNNS attention</td>
-<td headers="stat_1" class="gt_row gt_center">3.67 (3.14, 4.02)</td>
-<td headers="stat_2" class="gt_row gt_center">3.42 (2.80, 3.94)</td>
-<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
+<td headers="stat_1" class="gt_row gt_center">3.49 (3.11, 4.01)</td>
+<td headers="stat_2" class="gt_row gt_center">3.43 (2.80, 3.95)</td>
+<td headers="p.value" class="gt_row gt_center">0.7</td></tr>
     <tr><td headers="label" class="gt_row gt_left">    N-Missing</td>
-<td headers="stat_1" class="gt_row gt_center">16</td>
-<td headers="stat_2" class="gt_row gt_center">50</td>
+<td headers="stat_1" class="gt_row gt_center">15</td>
+<td headers="stat_2" class="gt_row gt_center">45</td>
 <td headers="p.value" class="gt_row gt_center"></td></tr>
   </tbody>
   &#10;  <tfoot class="gt_footnotes">
@@ -1554,3 +1554,43 @@ marginplot(
 ```
 
 ![](README_files/figure-commonmark/margin%20plot%20between%20attention%20scores%20and%20characteristics%20with%20significant%20differences%20by%20missingness-9.png)
+
+``` r
+nnns.imp1 <- mice(nnns, m = 20, maxit = 10, seed = 7050, blocks = list(c("Pre_Op_NNNS_attention_score"), c("Post_Op_NNNS_attention_score")), formulas = list(
+  Pre_Op_NNNS_attention_score = as.formula(
+    "Pre_Op_NNNS_attention_score ~ 
+    Age_at_Surgery_days + Female + Premature +
+    Genetic_Syndrome_or_Chromosomal_Abnormality + Cardiac_Anatomy"
+    # Pre_Op_NNNS_handling_score +
+    # Pre_Op_NNNS_Quality_of_Movement_Score +
+    # Pre_Op_NNNS_Regulation_Score +
+    # Pre_Op_NNNS_Non_Optimal_Reflexes_Score + 
+    # Pre_Op_NNNS_Stress_Score +
+    # Pre_Op_NNNS_Arousal_Score +
+    # Pre_Op_NNNS_Hypertonic_Score + 
+    # Pre_Op_NNNS_Hypotonic_Score + 
+    # Pre_Op_NNNS_Asymmetry_Score + 
+    # Pre_Op_NNNS_Excitability_Score + 
+    # Pre_Op_NNNS_Lethargy_Score
+    ),
+  Post_Op_NNNS_attention_score = as.formula(
+    "Post_Op_NNNS_attention_score ~
+    Age_at_Surgery_days + Female + Premature +
+    Genetic_Syndrome_or_Chromosomal_Abnormality + Cardiac_Anatomy + 
+    GI_Complication + Length_of_Stay_days + Length_of_intubation_days +
+    Extubation_failure"
+    # Pre_Op_NNNS_attention_score +
+    # Post_Op_NNNS_handling_score +
+    # Post_Op_NNNS_Quality_of_Movement_Score +
+    # Post_Op_NNNS_Regulation_Score +
+    # Post_Op_NNNS_Non_Optimal_Reflexes_Score +
+    # Post_Op_NNNS_Stress_Score +
+    # Post_Op_NNNS_Arousal_Score +
+    # Post_Op_NNNS_Hypertonic_Score +
+    # Post_Op_NNNS_Hypotonic_Score +
+    # Post_Op_NNNS_Asymmetry_Score +
+    # Post_Op_NNNS_Excitability_Score +
+    # Post_Op_NNNS_Lethargy_Score
+    )
+))
+```
