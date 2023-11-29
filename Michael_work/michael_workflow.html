@@ -3205,7 +3205,7 @@ Object.defineProperty(e,"__esModule",{value:!0}),e.mhchemParser=void 0;var r=fun
 </div>
 <section id="using-haojias-data-cleaning" class="level1">
 <h1>Using Haojia’s data cleaning:</h1>
-<div class="cell" data-hash="michael_workflow_cache/html/data cleaning_7a89a3629b6c2277c79bec071fa1b1f0">
+<div class="cell" data-hash="michael_workflow_cache/html/data cleaning_f7bc5be247e8a940ed6e2cceacc82b14">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># clean up variable names</span></span>
@@ -3221,49 +3221,46 @@ Object.defineProperty(e,"__esModule",{value:!0}),e.mhchemParser=void 0;var r=fun
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># include infants from birth to 4 weeks old</span></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># there are two outliers with age at surgery &gt; 30 days</span></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    Age_at_Surgery_days <span class="sc">&lt;=</span> <span class="dv">30</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>nnns <span class="ot">&lt;-</span> nnns0 <span class="sc">|&gt;</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># some binary variables have values of 1/2 or Y/N, recode them to 0/1</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">Female =</span> <span class="fu">as.integer</span>(sex_1_M_2_F <span class="sc">==</span> <span class="dv">2</span>),</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">Premature =</span> <span class="fu">as.integer</span>(Premature <span class="sc">==</span> <span class="dv">1</span>),</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">Extubation_failure =</span> <span class="fu">as.integer</span>(Extubation_failure <span class="sc">==</span> <span class="st">&quot;Y&quot;</span>),</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># relabel cardiac anatomy</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">Cardiac_Anatomy =</span> <span class="fu">factor</span>(</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>      Cardiac_Anatomy, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">labels =</span> <span class="fu">c</span>(</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Single ventricle w/o arch obstruction&quot;</span>,</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Single ventricle w/ arch obstruction&quot;</span>,</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Two ventricle w/o arch obstruction&quot;</span>,</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Two ventricle w/ arch obstruction&quot;</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># for model building purposes, combine the 2 levels w/o arch obstruction</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">Cardiac_Anatomy_collapsed =</span> <span class="fu">fct_collapse</span>(</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      Cardiac_Anatomy,</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;W/o arch obstruction&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;Single ventricle w/o arch obstruction&quot;</span>, <span class="st">&quot;Two ventricle w/o arch obstruction&quot;</span>),</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Single ventricle w/ arch obstruction&quot;</span> <span class="ot">=</span> <span class="st">&quot;Single ventricle w/ arch obstruction&quot;</span>,</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Two ventricle w/ arch obstruction&quot;</span> <span class="ot">=</span> <span class="st">&quot;Two ventricle w/ arch obstruction&quot;</span></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># convert date variables to date class</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">vars</span>(<span class="st">&quot;Date_PO_feeds_started&quot;</span>, <span class="st">&quot;Date_Reaching_Full_PO&quot;</span>, <span class="st">&quot;Date_Identified_as_not_yet_full_PO&quot;</span>), </span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    as_date, <span class="at">format =</span> <span class="st">&quot;%m/%d/%Y&quot;</span></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co"># drop unnecessary variables</span></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>nnns <span class="ot">&lt;-</span> nnns <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">!</span><span class="fu">c</span>(</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sex_1_M_2_F&quot;</span>, <span class="co"># use Female instead</span></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Intubated_Pre_operatively&quot;</span>, <span class="st">&quot;bypass_used&quot;</span>, <span class="st">&quot;bypass_time_min&quot;</span>, <span class="co"># not of interest </span></span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Neurologic_Complication&quot;</span>, <span class="st">&quot;AirwayAnomalyYN&quot;</span> <span class="co"># already excluded</span></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># some binary variables have values of 1/2 or Y/N, recode them to 0/1</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">Female =</span> <span class="fu">as.integer</span>(sex_1_M_2_F <span class="sc">==</span> <span class="dv">2</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">Premature =</span> <span class="fu">as.integer</span>(Premature <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">Extubation_failure =</span> <span class="fu">as.integer</span>(Extubation_failure <span class="sc">==</span> <span class="st">&quot;Y&quot;</span>),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># relabel cardiac anatomy</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">Cardiac_Anatomy =</span> <span class="fu">factor</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>      Cardiac_Anatomy, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Single ventricle w/o arch obstruction&quot;</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Single ventricle w/ arch obstruction&quot;</span>,</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Two ventricle w/o arch obstruction&quot;</span>,</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Two ventricle w/ arch obstruction&quot;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># for model building purposes, combine the 2 levels w/o arch obstruction</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">Cardiac_Anatomy_collapsed =</span> <span class="fu">fct_collapse</span>(</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>      Cardiac_Anatomy,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;W/o arch obstruction&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;Single ventricle w/o arch obstruction&quot;</span>, <span class="st">&quot;Two ventricle w/o arch obstruction&quot;</span>),</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Single ventricle w/ arch obstruction&quot;</span> <span class="ot">=</span> <span class="st">&quot;Single ventricle w/ arch obstruction&quot;</span>,</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Two ventricle w/ arch obstruction&quot;</span> <span class="ot">=</span> <span class="st">&quot;Two ventricle w/ arch obstruction&quot;</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># convert date variables to date class</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">vars</span>(<span class="st">&quot;Date_PO_feeds_started&quot;</span>, <span class="st">&quot;Date_Reaching_Full_PO&quot;</span>, <span class="st">&quot;Date_Identified_as_not_yet_full_PO&quot;</span>), </span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    as_date, <span class="at">format =</span> <span class="st">&quot;%m/%d/%Y&quot;</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co"># drop unnecessary variables</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>nnns <span class="ot">&lt;-</span> nnns <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">!</span><span class="fu">c</span>(</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sex_1_M_2_F&quot;</span>, <span class="co"># use Female instead</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Intubated_Pre_operatively&quot;</span>, <span class="st">&quot;bypass_used&quot;</span>, <span class="st">&quot;bypass_time_min&quot;</span>, <span class="co"># not of interest </span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Neurologic_Complication&quot;</span>, <span class="st">&quot;AirwayAnomalyYN&quot;</span> <span class="co"># already excluded</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -3289,75 +3286,56 @@ logit\left(q_i\right) = \mathbf x_4 \boldsymbol \beta_4 + I_1(\mathbf z_{4,i}\ga
 </section>
 <section id="fit-zoib-model" class="level2">
 <h2 class="anchored" data-anchor-id="fit-zoib-model">Fit ZOIB model</h2>
-<div class="cell" data-hash="michael_workflow_cache/html/zoib_093001c8178832b6a954e4e49c49cf69">
+<div class="cell" data-hash="michael_workflow_cache/html/zoib_75a7a4b9f4cde2c4fd4a22a050330970">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11282023</span>) <span class="co">#Set seed, bayesian model!</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">=</span><span class="fu">zoib</span>(Percent_of_feeds_taken_by_mouth_at_discharge <span class="co">#Response</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            <span class="sc">~</span>Age_at_Surgery_days<span class="sc">+</span>Premature<span class="sc">+</span>GI_Complication <span class="co">#x1 design matrix</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>       <span class="sc">|</span> <span class="dv">1</span> <span class="co">#x2 design matrix</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>     <span class="sc">|</span><span class="dv">1</span> <span class="co">#x3 design matrix</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>     <span class="sc">|</span><span class="dv">1</span>, <span class="co">#x4 design matrix</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">data =</span> nnns,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.response =</span> <span class="dv">1</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">zero.inflation =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">one.inflation =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">link.mu =</span> <span class="st">&quot;logit&quot;</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">link.x0 =</span> <span class="st">&quot;logit&quot;</span>,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">link.x1 =</span>  <span class="st">&quot;logit&quot;</span>,</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">random =</span> <span class="dv">0</span>,</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.chain =</span> <span class="dv">2</span>, <span class="co"># number of MCMC chains</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.iter =</span> <span class="dv">5000</span>, <span class="co">#number of iterations before burn/thin</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.thin =</span> <span class="dv">5</span>, <span class="co"># thinning period</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">seeds =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">4</span>) <span class="co">#vector of seeds for chains to make reproducable</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>     )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            <span class="sc">~</span>Female<span class="sc">+</span>Genetic_Syndrome_or_Chromosomal_Abnormality<span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>              Age_at_Surgery_days<span class="sc">+</span>Cardiac_Anatomy<span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>              Length_of_intubation_days<span class="sc">+</span>Length_of_Stay_days<span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>              Extubation_failure<span class="sc">+</span>GI_Complication<span class="sc">+</span>Premature</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>              <span class="co">#x1 design matrix</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>       <span class="sc">|</span> <span class="dv">1</span> <span class="co">#x2 design matrix- estimating variance</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>     <span class="sc">|</span>Female<span class="sc">+</span>Genetic_Syndrome_or_Chromosomal_Abnormality<span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>              Age_at_Surgery_days<span class="sc">+</span>Cardiac_Anatomy<span class="sc">+</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>              Length_of_intubation_days<span class="sc">+</span>Length_of_Stay_days<span class="sc">+</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>              Extubation_failure<span class="sc">+</span>GI_Complication<span class="sc">+</span>Premature <span class="co">#x3 design matrix</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>     <span class="sc">|</span>Female<span class="sc">+</span>Genetic_Syndrome_or_Chromosomal_Abnormality<span class="sc">+</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>              Age_at_Surgery_days<span class="sc">+</span>Cardiac_Anatomy<span class="sc">+</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>              Length_of_intubation_days<span class="sc">+</span>Length_of_Stay_days<span class="sc">+</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>              Extubation_failure<span class="sc">+</span>GI_Complication<span class="sc">+</span>Premature, <span class="co">#x4 design matrix</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">data =</span> nnns,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.response =</span> <span class="dv">1</span>,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">zero.inflation =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">one.inflation =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">link.mu =</span> <span class="st">&quot;logit&quot;</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">link.x0 =</span> <span class="st">&quot;logit&quot;</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>     <span class="at">link.x1 =</span>  <span class="st">&quot;logit&quot;</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>     <span class="at">random =</span> <span class="dv">0</span>,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.chain =</span> <span class="dv">2</span>, <span class="co"># number of MCMC chains</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.iter =</span> <span class="dv">5000</span>, <span class="co">#number of iterations before burn/thin</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>     <span class="at">n.thin =</span> <span class="dv">5</span>, <span class="co"># thinning period</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>     <span class="at">seeds =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">4</span>) <span class="co">#vector of seeds for chains to make reproducable</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>     )</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(model1, <span class="at">file=</span><span class="st">&quot;model1.RData&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] &quot;***************************************************************************&quot;
-[1] &quot;* List of parameter for which the posterior samples are generated         *&quot;
-[1] &quot;* b: regression coeff in the linear predictor for the mean of beta dist&#39;n *&quot;
-[1] &quot;* d: regression coeff in the linear predictor for the sum of the two      *&quot;
-[1] &quot;*    shape parameters in the beta distribution                            *&quot;
-[1] &quot;* b0: regression coeff in the linear predictor for Prob(y=0)              *&quot;
-[1] &quot;* b1: regression coeff in the linear predictor for Prob(y=1)              *&quot;
-[1] &quot;***************************************************************************&quot;
-Compiling model graph
-   Resolving undeclared variables
-   Allocating nodes
-Graph information:
-   Observed stochastic nodes: 124
-   Unobserved stochastic nodes: 26
-   Total graph size: 6204
-
-Initializing model
-
-NOTE: Stopping adaptation
-
-
-[1] &quot;NOTE: in the header of Markov Chain Monte Carlo (MCMC) output of    &quot;
-[1] &quot;parameters (coeff), predicted values (ypred), residuals (resid), and&quot;
-[1] &quot;standardized residuals (resid.std), *Start, End, Thinning Interval* &quot;
-[1] &quot;values are after the initial burning and thinning periods specified &quot;
-[1] &quot;by the user. For example, n.iter = 151, n.thin = 2, n.burn=1,       &quot;
-[1] &quot;then MCMC header of the *coeff* output would read as follows        &quot;
-[1] &quot;--------------------------------------------------------------------&quot;
-[1] &quot;Markov Chain Monte Carlo (MCMC) output:&quot;
-[1] &quot;Start = 1&quot;
-[1] &quot;End = 75&quot;
-[1] &quot;Thinning interval = 1&quot;
-[1] &quot;--------------------------------------------------------------------&quot;
-[1] &quot;                                                                    &quot;
-[1] &quot;Coefficients are presented in the order of b, b0 (if zero.inflation=TRUE),&quot;
-[1] &quot;b1 (if one.inflation=TRUE), and d. If the names of independent variables X&quot;
-[1] &quot;are not shown for the coefficients within each type (b, b0, b1, d), the   &quot;
-[1] &quot;first coeffient is always the intercept, followed the coefficients for the&quot;
-[1] &quot;X&#39;s in the order as how they are entered in the model specification.      &quot;
-[1] &quot;--------------------------------------------------------------------------&quot;</code></pre>
 </div>
+</section>
+<section id="interpreting-output" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-output">Interpreting output:</h2>
+<p>b: vector of estimates from Eqn 1; that is, g(mu) = xb*b +z*gamma</p>
+<p>d: vector of estimates from Eqn 2; that is, log(eta) = xd*d+z*gamma</p>
+<p>b0: vector of estimates from Eqn 3; that is, g(p0) = x0*b0 +z*gamma</p>
+<p>b1: vector of estimates from Eqn ;4 that is, g(p1) = x1*b1+z*gamma</p>
+<div class="cell" data-hash="michael_workflow_cache/html/unnamed-chunk-1_a0ff28188d6e06940fb781576c7406e9">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model1<span class="sc">$</span>coeff <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">=</span><span class="fu">readRDS</span>(<span class="at">file=</span><span class="st">&quot;model1.RData&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>model1<span class="sc">$</span>coeff <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -3369,34 +3347,87 @@ Sample size per chain = 960
 1. Empirical mean and standard deviation for each variable,
    plus standard error of the mean:
 
-          Mean      SD  Naive SE Time-series SE
-b[1] -1.562415 0.58799 0.0134189      0.0140992
-b[2] -0.013638 0.03274 0.0007473      0.0007474
-b[3]  0.681647 0.48953 0.0111720      0.0111741
-b[4]  0.008963 0.48180 0.0109955      0.0109790
-b0   -0.641955 0.19341 0.0044138      0.0045876
-b1   -1.360773 0.27663 0.0063133      0.0066353
-d     0.971679 0.16989 0.0038771      0.0043623
+             Mean       SD  Naive SE Time-series SE
+b[1]    -0.417389  0.98924 0.0225762      0.0240288
+b[2]    -0.614975  0.32891 0.0075064      0.0075076
+b[3]    -0.044877  0.38823 0.0088601      0.0093187
+b[4]     0.003792  0.04094 0.0009343      0.0009697
+b[5]    -0.276836  0.64373 0.0146911      0.0200935
+b[6]    -0.733748  0.55343 0.0126303      0.0180193
+b[7]    -1.004917  0.57944 0.0132240      0.0182326
+b[8]    -0.117973  0.07354 0.0016782      0.0016624
+b[9]     0.006360  0.01779 0.0004060      0.0004182
+b[10]   -0.851851  0.65817 0.0150205      0.0155782
+b[11]   -0.291289  0.56416 0.0128751      0.0130571
+b[12]    0.885216  0.59374 0.0135503      0.0139048
+b0[1]   -1.004207  1.70573 0.0389278      0.0514060
+b0[2]   -0.877702  0.56291 0.0128466      0.0132462
+b0[3]    0.537850  0.65373 0.0149192      0.0152950
+b0[4]   -0.049623  0.06131 0.0013991      0.0014489
+b0[5]    1.636666  1.25927 0.0287387      0.0499624
+b0[6]   -0.999664  1.22540 0.0279657      0.0484508
+b0[7]    0.674006  1.19139 0.0271896      0.0466541
+b0[8]    0.430289  0.12933 0.0029515      0.0032553
+b0[9]   -0.047989  0.02650 0.0006048      0.0006127
+b0[10]   2.638388  1.11277 0.0253954      0.0253462
+b0[11]  -1.918072  1.04599 0.0238713      0.0232604
+b0[12]  -0.673557  0.82427 0.0188112      0.0195555
+b1[1]  -26.514301 15.28478 0.3488257      3.8453260
+b1[2]    1.246863  1.06859 0.0243871      0.0251415
+b1[3]  -47.876005 32.75834 0.7476033      7.7235966
+b1[4]    0.394481  0.17633 0.0040242      0.0057331
+b1[5]   19.253273 15.18249 0.3464913      4.0479138
+b1[6]   20.483369 15.11528 0.3449576      4.1445839
+b1[7]   19.511975 15.15328 0.3458247      4.1443306
+b1[8]   -0.425695  0.24844 0.0056699      0.0060387
+b1[9]    0.038770  0.03918 0.0008942      0.0009883
+b1[10]  -0.119539  2.09334 0.0477738      0.0477830
+b1[11] -75.975912 56.28480 1.2845189      9.9511108
+b1[12]   1.661546  2.29572 0.0523924      0.0605269
+d        1.142958  0.18368 0.0041919      0.0039991
 
 2. Quantiles for each variable:
 
-         2.5%      25%      50%       75%    97.5%
-b[1] -2.73235 -1.93853 -1.55484 -1.182108 -0.39594
-b[2] -0.07976 -0.03493 -0.01335  0.008187  0.05159
-b[3] -0.25228  0.35690  0.68287  0.986365  1.68138
-b[4] -1.00100 -0.30675  0.02872  0.339760  0.92529
-b0   -1.03223 -0.76903 -0.63645 -0.516147 -0.26340
-b1   -1.93876 -1.53641 -1.35177 -1.167941 -0.84173
-d     0.64216  0.85482  0.97507  1.090640  1.29383</code></pre>
+             2.5%        25%        50%        75%     97.5%
+b[1]     -2.34605 -1.069e+00  -0.418230   0.239066  1.515059
+b[2]     -1.29037 -8.385e-01  -0.609260  -0.404985  0.044519
+b[3]     -0.80364 -2.995e-01  -0.054008   0.216826  0.727801
+b[4]     -0.07763 -2.374e-02   0.003280   0.031067  0.087200
+b[5]     -1.50521 -7.171e-01  -0.282606   0.161584  1.037740
+b[6]     -1.85658 -1.101e+00  -0.726913  -0.361454  0.379434
+b[7]     -2.10238 -1.412e+00  -1.000270  -0.618720  0.123875
+b[8]     -0.26082 -1.669e-01  -0.115098  -0.069725  0.026206
+b[9]     -0.03080 -4.878e-03   0.007029   0.017933  0.040246
+b[10]    -2.18686 -1.280e+00  -0.843270  -0.408557  0.416555
+b[11]    -1.39178 -6.689e-01  -0.276104   0.086703  0.780282
+b[12]    -0.22957  4.948e-01   0.868342   1.281248  2.120631
+b0[1]    -4.54634 -2.132e+00  -0.963140   0.158635  2.193715
+b0[2]    -2.00681 -1.235e+00  -0.871261  -0.491686  0.178476
+b0[3]    -0.72237  1.128e-01   0.544734   0.958047  1.852726
+b0[4]    -0.17535 -8.922e-02  -0.047607  -0.007468  0.065929
+b0[5]    -0.71468  8.042e-01   1.570251   2.450700  4.229445
+b0[6]    -3.25602 -1.860e+00  -1.036064  -0.206922  1.448038
+b0[7]    -1.47569 -1.241e-01   0.607936   1.449733  3.124236
+b0[8]     0.20251  3.412e-01   0.417250   0.511829  0.701855
+b0[9]    -0.10085 -6.517e-02  -0.048084  -0.030792  0.004581
+b0[10]    0.57448  1.881e+00   2.622644   3.390479  4.889446
+b0[11]   -4.09571 -2.564e+00  -1.863941  -1.229090  0.025006
+b0[12]   -2.24446 -1.201e+00  -0.666023  -0.128957  1.004380
+b1[1]   -55.27096 -3.829e+01 -24.857970 -12.956480 -4.375005
+b1[2]    -0.80040  5.508e-01   1.263801   1.906499  3.364737
+b1[3]  -120.99087 -6.882e+01 -41.658191 -19.494877 -6.506017
+b1[4]     0.08658  2.687e-01   0.378162   0.500726  0.770121
+b1[5]    -2.67611  5.798e+00  17.380050  31.507582 47.165980
+b1[6]    -0.74984  6.765e+00  18.806339  32.207352 47.909555
+b1[7]    -2.11409  5.899e+00  17.770389  31.317224 46.864692
+b1[8]    -0.94506 -5.772e-01  -0.415750  -0.256031  0.019777
+b1[9]    -0.03803  1.408e-02   0.038099   0.063711  0.117044
+b1[10]   -4.83248 -1.404e+00   0.007447   1.320288  3.597200
+b1[11] -209.66578 -1.117e+02 -64.554222 -29.846594 -3.796558
+b1[12]   -2.41863  7.585e-02   1.569230   3.116737  6.731379
+d         0.77471  1.023e+00   1.147743   1.271669  1.489396</code></pre>
 </div>
 </div>
-</section>
-<section id="interpreting-output" class="level2">
-<h2 class="anchored" data-anchor-id="interpreting-output">Interpreting output:</h2>
-<p>b: vector of estimates from Eqn 1; that is, g(mu) = xb*b +z*gamma</p>
-<p>d: vector of estimates from Eqn 2; that is, log(eta) = xd*d+z*gamma</p>
-<p>b0: vector of estimates from Eqn 3; that is, g(p0) = x0*b0 +z*gamma</p>
-<p>b1: vector of estimates from Eqn ;4 that is, g(p1) = x1*b1+z*gamma</p>
 </section>
 </section>
 

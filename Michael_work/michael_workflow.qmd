@@ -46,10 +46,7 @@ nnns <- nnns0 |>
     # include infants from birth to 4 weeks old
     # there are two outliers with age at surgery > 30 days
     Age_at_Surgery_days <= 30
-  )
-
-nnns <- nnns0 |>
-  
+  ) |>
   # some binary variables have values of 1/2 or Y/N, recode them to 0/1
   mutate(
     Female = as.integer(sex_1_M_2_F == 2),
@@ -116,13 +113,24 @@ $$
 
 ## Fit ZOIB model
 ```{r zoib}
+#| eval: false
 set.seed(11282023) #Set seed, bayesian model!
 
 model1 =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
-            ~Age_at_Surgery_days+Premature+GI_Complication #x1 design matrix
-       | 1 #x2 design matrix
-     |1 #x3 design matrix
-     |1, #x4 design matrix
+            ~Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+              Age_at_Surgery_days+Cardiac_Anatomy+
+              Length_of_intubation_days+Length_of_Stay_days+
+              Extubation_failure+GI_Complication+Premature
+              #x1 design matrix
+       | 1 #x2 design matrix- estimating variance
+     |Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+              Age_at_Surgery_days+Cardiac_Anatomy+
+              Length_of_intubation_days+Length_of_Stay_days+
+              Extubation_failure+GI_Complication+Premature #x3 design matrix
+     |Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+              Age_at_Surgery_days+Cardiac_Anatomy+
+              Length_of_intubation_days+Length_of_Stay_days+
+              Extubation_failure+GI_Complication+Premature, #x4 design matrix
      data = nnns,
      n.response = 1,
      zero.inflation = TRUE,
@@ -137,8 +145,10 @@ model1 =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
      seeds = c(3,4) #vector of seeds for chains to make reproducable
      )
 
-model1$coeff |> summary()
+saveRDS(model1, file="model1.RData")
 ```
+
+
 ## Interpreting output:
 
 b: vector of estimates from Eqn 1; that is, g(mu) = xb\*b +z\*gamma
@@ -147,8 +157,12 @@ d: vector of estimates from Eqn 2; that is, log(eta) = xd\*d+z\*gamma
 
 b0: vector of estimates from Eqn 3; that is, g(p0) = x0\*b0 +z\*gamma
 
-
 b1: vector of estimates from Eqn ;4 that is, g(p1) = x1\*b1+z\*gamma
 
+```{r}
+model1 =readRDS(file="model1.RData")
+
+model1$coeff |> summary()
+```
 
 
