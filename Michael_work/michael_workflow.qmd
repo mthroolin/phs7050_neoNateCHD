@@ -1,0 +1,154 @@
+---
+title: "Beta Regression"
+format:
+  html:
+    embed-resources: true
+    self-contained-math: true
+    code-fold: true
+    code-summary: "Show the code"
+    toc: true
+    toc-depth: 6
+    toc-location: left
+execute:
+  warning: false
+  message: false
+  cache: true
+---
+
+```{r setup}
+library(zoib)
+library(tidyverse)
+library(GGally)
+library(ggpubr)
+library(kableExtra)
+
+theme_set(theme_pubr(legend = "bottom"))
+
+# read in raw data
+nnns0 <- read.csv("../NNNS_score_data.csv")
+```
+
+# Using Haojia's data cleaning:
+```{r dataclean}
+#| label: data cleaning
+#| results: "hide"
+
+# clean up variable names
+# remove the dots at the end of variable names
+colnames(nnns0) <- gsub("\\.+$", "", colnames(nnns0))
+# replace all the dots in variable names with underscores
+colnames(nnns0) <- gsub("\\.+", "_", colnames(nnns0))
+
+nnns <- nnns0 |> 
+  filter(
+    # exclude neurologic or airway anomaly
+    Neurologic_Complication == 0, AirwayAnomalyYN == 0,
+    # include infants from birth to 4 weeks old
+    # there are two outliers with age at surgery > 30 days
+    Age_at_Surgery_days <= 30
+  )
+
+nnns <- nnns0 |>
+  
+  # some binary variables have values of 1/2 or Y/N, recode them to 0/1
+  mutate(
+    Female = as.integer(sex_1_M_2_F == 2),
+    Premature = as.integer(Premature == 1),
+    Extubation_failure = as.integer(Extubation_failure == "Y"),
+  ) |>
+  
+  # relabel cardiac anatomy
+  mutate(
+    Cardiac_Anatomy = factor(
+      Cardiac_Anatomy, levels = 1:4,
+      labels = c(
+        "Single ventricle w/o arch obstruction",
+        "Single ventricle w/ arch obstruction",
+        "Two ventricle w/o arch obstruction",
+        "Two ventricle w/ arch obstruction"
+      )
+    ),
+    # for model building purposes, combine the 2 levels w/o arch obstruction
+    Cardiac_Anatomy_collapsed = fct_collapse(
+      Cardiac_Anatomy,
+      "W/o arch obstruction" = c("Single ventricle w/o arch obstruction", "Two ventricle w/o arch obstruction"),
+      "Single ventricle w/ arch obstruction" = "Single ventricle w/ arch obstruction",
+      "Two ventricle w/ arch obstruction" = "Two ventricle w/ arch obstruction"
+    )
+  ) |>
+  
+  # convert date variables to date class
+  mutate_at(
+    vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), 
+    as_date, format = "%m/%d/%Y"
+  )
+
+# drop unnecessary variables
+nnns <- nnns |> select(!c(
+  "sex_1_M_2_F", # use Female instead
+  "Intubated_Pre_operatively", "bypass_used", "bypass_time_min", # not of interest 
+  "Neurologic_Complication", "AirwayAnomalyYN" # already excluded
+)) 
+```
+
+
+
+# Use ZOIB package
+
+## ZOIB Model
+
+$$
+f(y_i|\eta_i) = \begin{cases}
+p_i, & y_i =0 \\
+(1-p_i)q_i, & y_i =1 \\
+(1 − p_i)(1 − q_i)Beta(\alpha_{i_1}, \alpha_{i_2}) &y_i \in (0, 1)
+\end{cases}
+$$
+
+$$
+\begin{aligned}
+logit\left(\mu^{(0,1)} = \frac{\alpha_1}{\alpha_1+ \alpha_2}\right) = \mathbf x_1 \boldsymbol \beta_1 + I_1(\mathbf z_{1,i}\gamma_{1,i}) \\
+log\left(v_i = \alpha_1+ \alpha_2\right) = \mathbf x_2 \boldsymbol \beta_2 + I_2(\mathbf z_{2,i}\gamma_{2,i}) \\
+logit\left(p_i\right) = \mathbf x_3 \boldsymbol \beta_3 + I_1(\mathbf z_{3,i}\gamma_{3,i}) \\
+logit\left(q_i\right) = \mathbf x_4 \boldsymbol \beta_4 + I_1(\mathbf z_{4,i}\gamma_{4 ,i})
+\end{aligned}
+$$
+
+## Fit ZOIB model
+```{r zoib}
+set.seed(11282023) #Set seed, bayesian model!
+
+model1 =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
+            ~Age_at_Surgery_days+Premature+GI_Complication #x1 design matrix
+       | 1 #x2 design matrix
+     |1 #x3 design matrix
+     |1, #x4 design matrix
+     data = nnns,
+     n.response = 1,
+     zero.inflation = TRUE,
+     one.inflation = TRUE,
+     link.mu = "logit",
+     link.x0 = "logit",
+     link.x1 =  "logit",
+     random = 0,
+     n.chain = 2, # number of MCMC chains
+     n.iter = 5000, #number of iterations before burn/thin
+     n.thin = 5, # thinning period
+     seeds = c(3,4) #vector of seeds for chains to make reproducable
+     )
+
+model1$coeff |> summary()
+```
+## Interpreting output:
+
+b: vector of estimates from Eqn 1; that is, g(mu) = xb\*b +z\*gamma
+
+d: vector of estimates from Eqn 2; that is, log(eta) = xd\*d+z\*gamma
+
+b0: vector of estimates from Eqn 3; that is, g(p0) = x0\*b0 +z\*gamma
+
+
+b1: vector of estimates from Eqn ;4 that is, g(p1) = x1\*b1+z\*gamma
+
+
+
