@@ -82,7 +82,7 @@ nnns <- nnns0 |>
     Age_at_Surgery_days <= 30
   )
 
-nnns <- nnns0 |>
+nnns <- nnns |>
   
   # some binary variables have values of 1/2 or Y/N, recode them to 0/1
   mutate(
@@ -353,4 +353,44 @@ marginplot(
   xlab = "Post-op attention",
   ylab = "Post-op excitability"
 )
+```
+
+```{r, eval=FALSE}
+nnns.imp1 <- mice(nnns, m = 20, maxit = 10, seed = 7050, blocks = list(c("Pre_Op_NNNS_attention_score"), c("Post_Op_NNNS_attention_score")), formulas = list(
+  Pre_Op_NNNS_attention_score = as.formula(
+    "Pre_Op_NNNS_attention_score ~ 
+    Age_at_Surgery_days + Female + Premature +
+    Genetic_Syndrome_or_Chromosomal_Abnormality + Cardiac_Anatomy"
+    # Pre_Op_NNNS_handling_score +
+    # Pre_Op_NNNS_Quality_of_Movement_Score +
+    # Pre_Op_NNNS_Regulation_Score +
+    # Pre_Op_NNNS_Non_Optimal_Reflexes_Score + 
+    # Pre_Op_NNNS_Stress_Score +
+    # Pre_Op_NNNS_Arousal_Score +
+    # Pre_Op_NNNS_Hypertonic_Score + 
+    # Pre_Op_NNNS_Hypotonic_Score + 
+    # Pre_Op_NNNS_Asymmetry_Score + 
+    # Pre_Op_NNNS_Excitability_Score + 
+    # Pre_Op_NNNS_Lethargy_Score
+    ),
+  Post_Op_NNNS_attention_score = as.formula(
+    "Post_Op_NNNS_attention_score ~
+    Age_at_Surgery_days + Female + Premature +
+    Genetic_Syndrome_or_Chromosomal_Abnormality + Cardiac_Anatomy + 
+    GI_Complication + Length_of_Stay_days + Length_of_intubation_days +
+    Extubation_failure"
+    # Pre_Op_NNNS_attention_score +
+    # Post_Op_NNNS_handling_score +
+    # Post_Op_NNNS_Quality_of_Movement_Score +
+    # Post_Op_NNNS_Regulation_Score +
+    # Post_Op_NNNS_Non_Optimal_Reflexes_Score +
+    # Post_Op_NNNS_Stress_Score +
+    # Post_Op_NNNS_Arousal_Score +
+    # Post_Op_NNNS_Hypertonic_Score +
+    # Post_Op_NNNS_Hypotonic_Score +
+    # Post_Op_NNNS_Asymmetry_Score +
+    # Post_Op_NNNS_Excitability_Score +
+    # Post_Op_NNNS_Lethargy_Score
+    )
+))
 ```
