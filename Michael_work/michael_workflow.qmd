@@ -116,6 +116,7 @@ $$
 #| eval: false
 set.seed(11282023) #Set seed, bayesian model!
 
+tictoc::tic()
 model1 =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
             ~Pre_Op_NNNS_attention_score+
               Post_Op_NNNS_attention_score+
@@ -146,12 +147,12 @@ model1 =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
      link.x1 =  "logit",
      random = 0,
      n.chain = 4, # number of MCMC chains
-     n.iter = 7000, #number of iterations before burn/thin
-     n.thin = 5, # thinning period
-     n.burn = 2000, # burn-in period 
-     seeds = c(3,4,5,6) #vector of seeds for chains to make reproducable
+     n.iter = 10000, #number of iterations before burn/thin
+     n.thin = 10, # thinning period
+     n.burn = 5000, # burn-in period 
+     seeds = c(11,29,20,23) #vector of seeds for chains to make reproducable
      )
-
+tictoc::toc()
 saveRDS(model1, file="model1.RData")
 ```
 
