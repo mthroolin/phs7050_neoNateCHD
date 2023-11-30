@@ -12,7 +12,6 @@ format:
 execute:
   warning: false
   message: false
-  cache: true
 ---
 
 ```{r setup}
