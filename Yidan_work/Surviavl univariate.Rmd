@@ -1,0 +1,65 @@
+---
+title: "survival univariate"
+author: "Yidan Zhang"
+date: '2023-12-03'
+output: pdf_document
+---
+
+```{r}
+library(survival)
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r}
+data0 <- read.csv("~/Downloads/2023-Fall/7050 Statistical Practice/project collaborative/NNNS_score_data.csv", header=TRUE)#n=129
+#exclude those missing start date 
+data <- data0[data0$Date.PO.feeds.started!="",]#n=121
+#exclude those missing event and censored date
+data <- data[!(data$Date.Identified.as.not.yet.full.PO==""&data$Date.Reaching.Full.PO==""),]#n=118
+#mark the status, reach to full PO is event=1, censored=0
+data$status <- ifelse(data$Date.Reaching.Full.PO=="",1,0)
+#merge censor date and event date into one column
+data$Date.end <- paste(data$Date.Identified.as.not.yet.full.PO, data$Date.Reaching.Full.PO)
+#str(data)
+#change the date from character to date variable
+data$Date.PO.feeds.started <- mdy(data$Date.PO.feeds.started)
+data$Date.end <- mdy(data$Date.end)
+#str(data)
+#get the observed survive time
+data$obs_time <- as.numeric(interval(data$Date.PO.feeds.started,data$Date.end),"days")
+data$Cardiac.Anatomy <- as.factor(data$Cardiac.Anatomy)
+```
+
+```{r}
+#univariate models
+covariates <- colnames(data[c(1:4,6:9,12:13)])
+univ_formulas <- sapply(covariates,
+                        function(x) as.formula(paste('Surv(obs_time, status)~', x)))
+                        
+univ_models <- lapply( univ_formulas, function(x){coxph(x, data = data)})
+univ_results <- lapply(univ_models,
+                       function(x){ 
+                          x <- summary(x)
+                          p.value<-signif(x$wald["pvalue"], digits=2)
+                          wald.test<-signif(x$wald["test"], digits=2)
+                          beta<-signif(x$coef[1], digits=2);#coeficient beta
+                          HR <-signif(x$coef[2], digits=2);#exp(beta)
+                          HR.confint.lower <- signif(x$conf.int[,"lower .95"], 2)
+                          HR.confint.upper <- signif(x$conf.int[,"upper .95"],2)
+                          HR <- paste0(HR, " (", 
+                                       HR.confint.lower, "-", HR.confint.upper, ")")
+                          res<-c(beta, HR, wald.test, p.value)
+                          names(res)<-c("beta", "HR (95% CI for HR)", "wald.test", 
+                                        "p.value")
+                          return(res)
+                          #return(exp(cbind(coef(x),confint(x))))
+                         })
+res <- t(as.data.frame(univ_results, check.names = FALSE))
+as.data.frame(res)
+
+res.car <- coxph(Surv(obs_time, status) ~ Cardiac.Anatomy, data = data)
+res.car
+```
+
