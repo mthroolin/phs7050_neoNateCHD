@@ -1,0 +1,745 @@
+---
+title: "The Impact of Neurobehavior on Feeding Outcomes in Neonates with CHD"
+author: "Haojia Li"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = F, message = F, cache = F, fig.align = 'center', comment = NA)
+```
+
+```{r}
+#| label: load packages and raw data
+#| message: FALSE
+#| warning: FALSE
+
+library(tidyverse)
+library(gtsummary)
+library(knitr)
+library(kableExtra)
+# handle missing data
+library(VIM) # visualization
+library(mice) # imputation
+
+# read in raw data
+nnns0 <- read.csv("../NNNS_score_data.csv")
+```
+
+## Data cleaning
+
+Data file: "NNNS_score_data.csv";
+Data dictionary: "NNNS_score_data_dictionary.xlsx".
+
+The raw data contains 129 observations and 44 columns.
+Infants with neurologic or airway anomaly should be excluded from the analysis.
+
+Outcome 1 is the percentage of feeds taken by mouth at discharge, 
+which is bounded by [0,1], with a substantial fraction of the data falling at the boundaries (exactly 0’s and 1’s).
+
+Outcome 2 is the time to achieve full oral feeds after cardiac surgery,
+which is calculated as the time difference in days between the start date of PO feed 
+and either the date of reaching full PO or the date of "not yet full PO".
+Non-missing date of "not yet full PO" indicates censoring.
+
+Besides the predictor, NNNS attention score, the variables of interest include:
+sex, genetic syndrome, age at surgery in days, prematurity, cardiac anatomy,
+length of intubation, length of stay, extubation failure and gastrointestinal complications.
+
+The 12 other NNNS scales, pre-op and post-op, are not of interest in this analysis,
+but could be used as auxiliary variables in the imputation model.
+
+```{r}
+# clean up variable names
+# remove the dots at the end of variable names
+colnames(nnns0) <- gsub("\\.+$", "", colnames(nnns0))
+# replace all the dots in variable names with underscores
+colnames(nnns0) <- gsub("\\.+", "_", colnames(nnns0))
+
+# summary of the data
+# summary(nnns0)
+
+nnns <- nnns0 |> 
+  
+  filter(
+    # exclude neurologic or airway anomaly
+    Neurologic_Complication == 0, AirwayAnomalyYN == 0,
+    # include infants from birth to 4 weeks old
+    # there are two outliers with age at surgery > 30 days
+    Age_at_Surgery_days <= 30
+  ) |>
+  
+  mutate(
+    
+    # some binary variables have values of 1/2 or Y/N, recode them to 0/1
+    Female = as.integer(sex_1_M_2_F == 2),
+    Premature = as.integer(Premature == 1),
+    Extubation_failure = as.integer(Extubation_failure == "Y"),
+    
+    # for model building purposes, combine the 2 levels w/o arch obstruction in cardiac anatomy
+    Cardiac_Anatomy = factor(case_when(
+      Cardiac_Anatomy %in% c(1,3) ~ 1,
+      Cardiac_Anatomy == 2 ~ 2,
+      Cardiac_Anatomy == 4 ~ 3
+    ), levels = 1:3, labels = c("W/o arch obstruction", "Single ventricle w/ arch obstruction", "Two ventricle w/ arch obstruction"))
+    
+  ) |>
+  
+  # convert date variables to date class
+  mutate_at(
+    vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), 
+    as_date, format = "%m/%d/%Y"
+  ) |> 
+  
+  # drop unnecessary variables
+  select(!c(
+    "sex_1_M_2_F", # use Female instead
+    "Intubated_Pre_operatively", "bypass_used", "bypass_time_min", # not of interest 
+    "Neurologic_Complication", "AirwayAnomalyYN" # already excluded
+  )) 
+
+# names and labels of variables
+dict_nnns <- data.frame(
+  
+  name = c(
+    # primary outcome
+    "Percent_of_feeds_taken_by_mouth_at_discharge",
+    # predictor of interest
+    "Pre_Op_NNNS_attention_score", "Post_Op_NNNS_attention_score",
+    # 8 infant/surgery characteristics
+    "Age_at_Surgery_days", "Female",
+    "Genetic_Syndrome_or_Chromosomal_Abnormality", "Cardiac_Anatomy",
+    "GI_Complication", "Length_of_Stay_days",
+    "Length_of_intubation_days", "Extubation_failure",
+    # 12 pre-op non-attention NNNS scores
+    "Pre_Op_NNNS_habituation_score", "Pre_Op_NNNS_handling_score",
+    "Pre_Op_NNNS_Quality_of_Movement_Score", "Pre_Op_NNNS_Regulation_Score",
+    "Pre_Op_NNNS_Non_Optimal_Reflexes_Score", "Pre_Op_NNNS_Stress_Score",
+    "Pre_Op_NNNS_Arousal_Score", "Pre_Op_NNNS_Hypertonic_Score",
+    "Pre_Op_NNNS_Hypotonic_Score", "Pre_Op_NNNS_Asymmetry_Score",
+    "Pre_Op_NNNS_Excitability_Score", "Pre_Op_NNNS_Lethargy_Score",
+    # 12 post-op non-attention NNNS scores
+    "Post_Op_NNNS_habituation_score", "Post_Op_NNNS_handling_score",
+    "Post_Op_NNNS_Quality_of_Movement_Score", "Post_Op_NNNS_Regulation_Score",
+    "Post_Op_NNNS_Non_Optimal_Reflexes_Score", "Post_Op_NNNS_Stress_Score",
+    "Post_Op_NNNS_Arousal_Score", "Post_Op_NNNS_Hypertonic_Score",
+    "Post_Op_NNNS_Hypotonic_Score", "Post_Op_NNNS_Asymmetry_Score",
+    "Post_Op_NNNS_Excitability_Score", "Post_Op_NNNS_Lethargy_Score"
+  ), 
+  
+  label = c(
+    # primary outcome
+    "Percentage of oral feed at discharge",
+    # predictor of interest
+    "Pre-op attention", "Post-op attention",
+    # 8 infant/surgery characteristics
+    "Age at surgery in days", "Female",
+    "Genetic Syndrome / Chromosomal Abnormality", "Cardiac Anatomy",
+    "Gastrointestinal Complication", "Length of Stay in days", 
+    "Length of intubation in days", "Extubation failure", 
+    # 12 pre-op non-attention NNNS scores
+    "Pre-op habituation", "Pre-op handling", "Pre-op quality of movement", 
+    "Pre-op regulation", "Pre-op non-optimal reflexes", "Pre-op stress", 
+    "Pre-op arousal", "Pre-op hypertonic", "Pre-op hypotonic", 
+    "Pre-op asymmetry", "Pre-op excitability", "Pre-op lethargy", 
+    # 12 post-op non-attention NNNS scores
+    "Post-op habituation", "Post-op handling", "Post-op quality of movement",
+    "Post-op regulation", "Post-op non-optimal reflexes", "Post-op stress", 
+    "Post-op arousal", "Post-op hypertonic", "Post-op hypotonic", 
+    "Post-op asymmetry", "Post-op excitability", "Post-op lethargy" 
+  ))
+
+# create sets of variables for the convenience of calling them later
+basevar <- c(
+  "Age_at_Surgery_days", "Female",
+  "Genetic_Syndrome_or_Chromosomal_Abnormality", "Cardiac_Anatomy",
+  "GI_Complication", "Length_of_Stay_days",
+  "Length_of_intubation_days", "Extubation_failure"
+)
+preop_nnns <- dict_nnns$name[grepl("Pre_Op_NNNS", dict_nnns$name)]
+postop_nnns <- dict_nnns$name[grepl("Post_Op_NNNS", dict_nnns$name)]
+
+# function to label variables
+label_data <- function(data) {
+  colnames(data) <- ifelse(
+    colnames(data) %in% dict_nnns$name, 
+    dict_nnns$label[match(colnames(data), dict_nnns$name)],
+    colnames(data)
+  )
+  return(data)
+}
+```
+
+## Missing data
+
+There are in total of 30 variables with missing values: 
+percentage of oral feed at discharge, 13 pre-op NNNS scores, 13 post-op NNNS scores, and 3 date variables.
+The missing values in the date variables are not real missing values, but rather an indication of censoring.
+There are 5 (4.35%) missing values in the percentage of oral feed at discharge, 
+60 (52.17%) in pre-op attention score, and 33 (28.70%) in post-op attention score.
+
+```{r}
+# variables with missing data
+data.frame(nmiss = colSums(is.na(nnns |> select(-starts_with("Date"))))) |>
+  # only keep variables with missing data
+  filter(nmiss > 0) |>
+  # add percentage
+  mutate(perc = round(nmiss / nrow(nnns) * 100, 1)) |>
+  # add variable names
+  rownames_to_column("variable") |>
+  # match variable names with labels
+  mutate(variable = dict_nnns$label[match(variable, dict_nnns$name)]) |>
+  # sort by percentage
+  arrange(desc(perc)) |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) |>
+  scroll_box(height = "300px")
+```
+
+### Missing pattern of pre-op and post-op NNNS {.tabset .tabset-fade .tabset-pills}
+
+There are 85 (73.9%) missing values in the pre-op habituation score. 
+By introducing a binary indicator for missingness, the missing values can be eliminated 
+and the information of habituation can be partially preserved for data imputation.
+Habituation is not included in the plots as we will use the binary indicator of missingness instead.
+
+We found that the proportion of missing values in attention and handling scores are higher than the others. 
+So we ploted the missing data pattern of all the 12 NNNS scores first, 
+then the plot with attention score excluded, 
+and finally the plot with both attention and handling scores excluded.
+
+The plots show that the missing is consistent scross the 10 NNNS scores 
+(i.e., 13 NNNS scores, excluding habituation, attention, and handling). 
+Except for the only one observation with pre-op regulation missing while others not, 
+there are only 3 situations: (1) all the pre-op and post-op scores are assessed, 
+(2) all the pre-op scores are missing but all the post-op scores are assessed, 
+and (3) all the pre-op scores are assessed but all the post-op scores are missing. 
+This means it is fair to treat these 10 NNNS scores the same when 
+identifying the predictive characteristics of missingness.
+
+In order to incorporate the information of other missing situations,
+we created a count variable of missing NNNS scores (excluding habituation, attention, and handling).
+
+#### 12 NNNS scores
+
+```{r}
+#| fig.width: 8
+#| fig.height: 8
+
+nnns <- nnns |>
+  # create indicator of missing pre-op and post-op habituation score
+  mutate(
+    Pre_Op_habituation_missing = as.integer(is.na(Pre_Op_NNNS_habituation_score)),
+    Post_Op_habituation_missing = as.integer(is.na(Post_Op_NNNS_habituation_score))
+  ) |>
+  # create indicator of missing pre-op and post-op attention score
+  mutate(
+    Pre_Op_attention_missing = as.integer(is.na(Pre_Op_NNNS_attention_score)),
+    Post_Op_attention_missing = as.integer(is.na(Post_Op_NNNS_attention_score))
+  ) |>
+  # create a count variable of missing NNNS scores
+  mutate(
+    preop_nnns_missing = rowSums(is.na(pick(preop_nnns))) - Pre_Op_attention_missing - Pre_Op_habituation_missing,
+    postop_nnns_missing = rowSums(is.na(pick(postop_nnns))) - Post_Op_attention_missing - Post_Op_habituation_missing
+  )
+
+nnns_score <- nnns |> select(preop_nnns, postop_nnns, -contains("habituation"))
+
+# shorten variable names
+colnames(nnns_score) <- sapply(
+  colnames(nnns_score), 
+  \(x) 
+  # remove the "Pre_/Post_Op_NNNS_" prefix and "_score" suffix
+  # use nchar("_score") to avoid to distinguish upper and lower case
+  str_sub(x, str_locate(x, "NNNS_")[2] + 1, nchar(x) - nchar("_score")) |> 
+    # capitalize the first letter
+    str_to_title() |> 
+    # replace underscore with space
+    str_replace_all("_", " ") |>
+    # add 0/1 suffix to indicate pre-op/post-op
+    paste(ifelse(str_starts(x, "Post"), "Post", "Pre"))
+)
+
+aggr(
+  nnns_score, 
+  col = c("navyblue", "red"), numbers = T, prop = F, sortVars = F, combined = T,
+  cex.axis = .8, cex.numbers = .8, oma = c(10,0,0,2)
+)
+
+```
+
+#### 11 NNNS scores
+
+```{r}
+#| fig.width: 8
+#| fig.height: 6
+
+aggr(
+  nnns_score |> select(-contains("Attention")), 
+  col = c("navyblue", "red"), numbers = T, prop = F, sortVars = F, combined = T,
+  cex.axis = .8, cex.numbers = .8, oma = c(10,0,0,2)
+)
+```
+
+#### 10 NNNS scores
+
+```{r}
+#| fig.width: 8
+#| fig.height: 4
+
+aggr(
+  nnns_score |> select(-contains("Attention"), -contains("Handling")), 
+  col = c("navyblue", "red"), numbers = T, prop = F, sortVars = F, combined = T,
+  cex.axis = .8, cex.numbers = .8, oma = c(10,0,0,2)
+)
+```
+
+### Characteristics distribution by missingness {.tabset .tabset-fade .tabset-pills}
+
+Given the sample size, we used significance level of 0.1 in the descriptive tables.
+
+#### Percentage of oral feed at discharge
+
+There are 5 (4.35%) missing values in the percentage of oral feed at discharge.
+
+The missingness in percentage of oral feed at discharge is associated with 
+higher risk of GI complication (60% vs 8.2%, p = 0.008),
+lower post-op stress level (0.02 vs 0.06, p = 0.021),
+and higher asymmetry (1 vs 0, p = 0.028).
+
+```{r}
+# characteristics disgribution by missing percentage of oral feed at discharge
+nnns |>
+  mutate(Percent_of_feeds_taken_by_mouth_at_discharge_missing = factor(is.na(Percent_of_feeds_taken_by_mouth_at_discharge), levels = c(F, T), labels = c("Non-missing", "Missing"))) |>
+  select(
+    all_of(c(basevar, preop_nnns, postop_nnns)),
+    Percent_of_feeds_taken_by_mouth_at_discharge_missing
+  ) |>
+  label_data() |>
+  tbl_summary(
+    by = Percent_of_feeds_taken_by_mouth_at_discharge_missing,
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing_text = "Not assessed"
+  ) |>
+  # add p-values to the table and bold p-values < 0.1
+  add_p() |> bold_p(t = 0.1) |>
+  modify_caption("Characteristics distribution by missing percentage of oral feed at discharge")
+
+
+```
+
+#### Pre-op attention
+
+There are 60 (52.2%) missing values in the pre-op attention score.
+
+The missingness in pre-op attention score is associated with 
+lower quality of movement (median 4.37 vs 4.80, p = 0.063),
+lower level of regulation (median 4.64 vs 4.86, p = 0.015),
+higher non-optimal reflexes (median 7 vs 5, p = 0.007),
+higher hypertonicity (3rd quartile 1 vs 0, p = 0.082),
+and lower legarthy (median 6 vs 7, p = 0.042).
+
+The missingness in pre-op attention score is not associated with 
+the post-op attention score.
+
+```{r}
+# characteristics disgribution by missing pre-op attention score
+nnns |>
+  mutate(Pre_Op_attention_missing = factor(Pre_Op_attention_missing, levels = c(0, 1), labels = c("Non-missing", "Missing"))) |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge, all_of(c(basevar, preop_nnns)),
+    Pre_Op_attention_missing, -Pre_Op_NNNS_attention_score, Post_Op_NNNS_attention_score
+  ) |>
+  label_data() |>
+  tbl_summary(
+    by = Pre_Op_attention_missing,
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing_text = "Not assessed"
+  ) |>
+  # add p-values to the table and bold p-values < 0.1
+  add_p() |> bold_p(t = 0.1) |>
+  modify_caption("Characteristics distribution by missing pre-op attention score")
+
+```
+
+#### Post-op attention
+
+There are 33 (28.7%) missing values in the post-op attention score.
+
+The missingness in post-op attention score is associated with 
+higher percentage of oral feed at discharge (median 0.15 vs 0.02, p = 0.019), 
+higher age at surgery (median 8 vs 7, p = 0.046), 
+higher probability of two ventricle (45% vs 29%) with arch obstruction 
+comparing to single ventricle, 
+lower quality of movement (median 4.20 vs 4.67, p = 0.050),
+lower level of regulation (median 5.00 vs 3.67, p < 0.001),
+higher non-optimal reflexes (3rd quartile 4 vs 3, p = 0.035), 
+and higher excitability (median 6 vs 3, p < 0.001).
+
+The missingness in post-op attention score is not associated with 
+the pre-op attention score.
+
+
+```{r}
+# characteristics disgribution by missing post-op attention score
+nnns |>
+  mutate(Post_Op_attention_missing = factor(Post_Op_attention_missing, levels = c(0, 1), labels = c("Non-missing", "Missing"))) |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge, all_of(c(basevar, postop_nnns)),
+    Post_Op_attention_missing, -Post_Op_NNNS_attention_score, Pre_Op_NNNS_attention_score
+  ) |>
+  label_data() |>
+  tbl_summary(
+    by = Post_Op_attention_missing,
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing_text = "Not assessed"
+  ) |>
+  # add p-values to the table and bold p-values < 0.1
+  add_p() |> bold_p(t = 0.1) |>
+  modify_caption("Characteristics distribution by missing post-op attention score")
+
+```
+#### Pre-op habituation
+
+It shows that the non-missing pre-op habituation score is associated with 
+higher percentage of oral feed at discharge (median 0.18 vs 0.02, p = 0.061).
+
+```{r}
+# characteristics disgribution by missing pre-op habituation score
+nnns |>
+  mutate(Pre_Op_habituation_missing = factor(Pre_Op_habituation_missing, levels = c(0, 1), labels = c("Non-missing", "Missing"))) |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge, all_of(c(basevar, preop_nnns)),
+    Pre_Op_habituation_missing, -Pre_Op_NNNS_habituation_score
+  ) |>
+  label_data() |>
+  tbl_summary(
+    by = Pre_Op_habituation_missing,
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing_text = "Not assessed"
+  ) |>
+  # add p-values to the table and bold p-values < 0.1
+  add_p() |> bold_p(t = 0.1) |>
+  modify_caption("Characteristics distribution by missing pre-op habituation score")
+
+```
+
+#### Post-op habituation
+
+There are 85 (73.9%) missing values in the post-op habituation score.
+
+The missing group has higher level of regulation (median 5.07 vs 4.81, p = 0.042) and 
+lower asymmetry (median 0 vs 1, p = 0.011), 
+both of which are indicators of better neurobehavioral performance.
+
+```{r}
+# characteristics disgribution by missing post-op habituation score
+nnns |>
+  mutate(Post_Op_habituation_missing = factor(Post_Op_habituation_missing, levels = c(0, 1), labels = c("Non-missing", "Missing"))) |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge, all_of(c(basevar, postop_nnns)),
+    Post_Op_habituation_missing, -Post_Op_NNNS_habituation_score
+  ) |>
+  label_data() |>
+  tbl_summary(
+    by = Post_Op_habituation_missing,
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing_text = "Not assessed"
+  ) |>
+  # add p-values to the table and bold p-values < 0.1
+  add_p() |> bold_p(t = 0.1) |>
+  modify_caption("Characteristics distribution by missing post-op habituation score")
+
+```
+
+#### Pre-op & post-op other 10 NNNS
+
+```{r}
+nnns <- nnns |> mutate(
+  Arousal_missing = factor(case_when(
+    !is.na(Pre_Op_NNNS_Arousal_Score) & !is.na(Post_Op_NNNS_Arousal_Score) ~ 0,
+    is.na(Post_Op_NNNS_Arousal_Score) ~ 1,
+    TRUE ~ 2
+  ), levels = 0:2, labels = c("Both assessed", "Pre-op assessed only", "Post-op assessed only"))
+)
+
+# characteristics disgribution by missing pre-op and post-op arousal score
+nnns |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge, 
+    Pre_Op_NNNS_attention_score, Post_Op_NNNS_attention_score,
+    basevar, Arousal_missing
+  ) |>
+  label_data() |>
+  tbl_summary(
+    by = Arousal_missing,
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing_text = "Not assessed"
+  ) |>
+  # add p-values to the table and bold p-values < 0.1
+  add_p() |> bold_p(t = 0.1) |>
+  modify_caption("Characteristics distribution by missing pre-op and post-op arousal score")
+```
+
+### Correlation among variables {.tabset .tabset-fade .tabset-pills}
+
+#### Pre-op attention vs others
+
+```{r}
+nnns |>
+  select(preop_nnns, -Pre_Op_NNNS_habituation_score) |>
+  gather(key = "NNNS", value = "score", -Pre_Op_NNNS_attention_score) |>
+  # remove missing values
+  drop_na() |>
+  # calculate number of pairs of scores and Spearman correlation
+  group_by(NNNS) |>
+  summarize(
+    n = n(),
+    rho = cor(score, Pre_Op_NNNS_attention_score, method = "spearman") |> round(2),
+    # p-value of Spearman correlation
+    p = cor.test(score, Pre_Op_NNNS_attention_score, method = "spearman")$p.value |> round(3)
+  ) |>
+  mutate(
+    # add significance mark
+    signif = case_when(
+      p < 0.05 ~ "\\*",
+      p < 0.1 ~ "\\.",
+      TRUE ~ ""
+    ),
+    # label NNNS
+    NNNS = dict_nnns$label[match(NNNS, dict_nnns$name)]
+  ) |>
+  arrange(p) |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+#### Post-op attention vs others
+
+```{r}
+nnns |>
+  select(postop_nnns, -Post_Op_NNNS_habituation_score) |>
+  gather(key = "NNNS", value = "score", -Post_Op_NNNS_attention_score) |>
+  # remove missing values
+  drop_na() |>
+  # calculate number of pairs of scores and Spearman correlation
+  group_by(NNNS) |>
+  summarize(
+    n = n(),
+    rho = cor(score, Post_Op_NNNS_attention_score, method = "spearman") |> round(2),
+    # p-value of Spearman correlation
+    p = cor.test(score, Post_Op_NNNS_attention_score, method = "spearman")$p.value |> round(3)
+  ) |>
+  mutate(
+    # add significance mark
+    signif = case_when(
+      p < 0.05 ~ "\\*",
+      p < 0.1 ~ "\\.",
+      TRUE ~ ""
+    ),
+    # label NNNS
+    NNNS = dict_nnns$label[match(NNNS, dict_nnns$name)]
+  ) |>
+  arrange(p) |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+#### % Oral feed vs NNNS
+
+```{r}
+nnns |>
+  select(preop_nnns, postop_nnns, -contains("habituation"),
+         Percent_of_feeds_taken_by_mouth_at_discharge) |>
+  gather(key = "NNNS", value = "score", -Percent_of_feeds_taken_by_mouth_at_discharge) |>
+  # remove missing values
+  drop_na() |>
+  # calculate number of pairs of scores and Spearman correlation
+  group_by(NNNS) |>
+  summarize(
+    n = n(),
+    rho = cor(score, Percent_of_feeds_taken_by_mouth_at_discharge, method = "spearman") |> round(2),
+    # p-value of Spearman correlation
+    p = cor.test(score, Percent_of_feeds_taken_by_mouth_at_discharge, method = "spearman")$p.value |> round(3)
+  ) |>
+  mutate(
+    # add significance mark
+    signif = case_when(
+      p < 0.05 ~ "\\*",
+      p < 0.1 ~ "\\.",
+      TRUE ~ ""
+    ),
+    # label NNNS
+    NNNS = dict_nnns$label[match(NNNS, dict_nnns$name)]
+  ) |>
+  arrange(p) |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
+
+### Predictive factors of missingness {.tabset .tabset-fade .tabset-pills}
+
+#### AUC of missing in one period from another
+
+We used the NNNS score to predict the missing of the same score in another period 
+and got AUCs ranging from 0.5 to 0.643, which means that same
+assessment item from different periods are not quite predictive to the missingness.
+
+```{r}
+as.data.frame(t(apply(
+  expand.grid(preop_nnns, postop_nnns), 1,
+  \(x) {
+    auc <- NA
+    if(x[1] != x[2]) {
+      roc_res <- pROC::roc(as.formula(paste0("is.na(", x[1], ") ~ ", x[2])), data = nnns)
+      auc_est <- round(roc_res$auc, 3)
+      auc_ci <- round(pROC::ci.auc(roc_res), 3)
+      if(auc_est < 0.5) return(c(x[1], x[2], 1-auc_est, 1-auc_ci[2], 1-auc_ci[1]))
+      else return(c(x[1], x[2], auc_est, auc_ci[1], auc_ci[2]))
+    }
+  }
+))) |> 
+  setNames(c("Pre-op missingness", "Post-op score", "AUC", "Lower CI", "Upper CI")) |>
+  mutate(
+    `Pre-op missingness` = factor(dict_nnns$label[match(`Pre-op missingness`, dict_nnns$name)]),
+    `Post-op score` = factor(dict_nnns$label[match(`Post-op score`, dict_nnns$name)])
+  ) |>
+  # present table using DT to enable searching
+  DT::datatable(filter = "top")
+```
+
+```{r}
+as.data.frame(t(apply(
+  expand.grid(postop_nnns, preop_nnns), 1,
+  \(x) {
+    auc <- NA
+    if(x[1] != x[2]) {
+      roc_res <- pROC::roc(as.formula(paste0("is.na(", x[1], ") ~ ", x[2])), data = nnns)
+      auc_est <- round(roc_res$auc, 3)
+      auc_ci <- round(pROC::ci.auc(roc_res), 3)
+      if(auc_est < 0.5) return(c(x[1], x[2], 1-auc_est, 1-auc_ci[2], 1-auc_ci[1]))
+      else return(c(x[1], x[2], auc_est, auc_ci[1], auc_ci[2]))
+    }
+  }
+))) |> 
+  setNames(c("Post-op missingness", "Pre-op score", "AUC", "Lower CI", "Upper CI")) |>
+  mutate(
+    `Post-op missingness` = factor(dict_nnns$label[match(`Post-op missingness`, dict_nnns$name)]),
+    `Pre-op score` = factor(dict_nnns$label[match(`Pre-op score`, dict_nnns$name)])
+  ) |>
+  # present table using DT to enable searching
+  DT::datatable(filter = "top")
+```
+
+## Data Imputation
+
+1. For each of the variables with missing values, we will include 
+age at surgery, sex, genetic syndrome, cardiac anomaly class, and length of intubation 
+for imputation since they are identified as covariates of interest and 
+have no missing values.
+
+2. For the outcome, percent of feeds taken by mouth at discharge, 
+and the predictors, pre- and post-op attention score, we will further include 
+variables that are correlated to them and predictive of their missingness.
+
+3. The other NNNS scores are auxiliary variables for data imputation, but also have missing values. 
+We will include variables that are predictive of their missingness in imputation.
+
+```{r, eval=FALSE}
+basevar_imp <- c(
+  "Age_at_Surgery_days", "Female",
+  "Genetic_Syndrome_or_Chromosomal_Abnormality", "Cardiac_Anatomy",
+  "Length_of_intubation_days"
+) |> paste(collapse = " + ")
+
+nnns_mice <- mice(
+  nnns.not.imputed, 
+  # avoid imputing the date variables
+  where = as.data.frame.array(is.na(nnns.not.imputed)) |>
+    mutate_at(vars(starts_with("Date")), \(x) x = FALSE),
+  m = 20, maxit = 10, seed = 7050, print = F,
+  formulas = list(
+    Pre_Op_NNNS_handling_score = as.formula(
+      paste("Pre_Op_NNNS_handling_score ~", basecov, "+ Post_Op_NNNS_handling_score")
+    ),
+    Pre_Op_NNNS_Quality_of_Movement_Score = as.formula(
+      paste("Pre_Op_NNNS_Quality_of_Movement_Score ~", basevar_imp, "+ Post_Op_NNNS_Quality_of_Movement_Score")
+    ),
+    Pre_Op_NNNS_Regulation_Score = as.formula(
+      paste("Pre_Op_NNNS_Regulation_Score ~", basecov, "+ Post_Op_NNNS_Regulation_Score")
+    ),
+    Pre_Op_NNNS_Non_Optimal_Reflexes_Score = as.formula(
+      paste("Pre_Op_NNNS_Non_Optimal_Reflexes_Score ~", basecov, "+ Post_Op_NNNS_Non_Optimal_Reflexes_Score")
+    ),
+    Pre_Op_NNNS_Stress_Score = as.formula(
+      paste("Pre_Op_NNNS_Stress_Score ~", basecov, "+ Post_Op_NNNS_Stress_Score")
+    ),
+    Pre_Op_NNNS_Arousal_Score = as.formula(
+      paste("Pre_Op_NNNS_Arousal_Score ~", basecov, "+ Post_Op_NNNS_Arousal_Score")
+    ),
+    Pre_Op_NNNS_Hypertonic_Score = as.formula(
+      paste("Pre_Op_NNNS_Hypertonic_Score ~", basecov, "+ Post_Op_NNNS_Hypertonic_Score")
+    ),
+    Pre_Op_NNNS_Hypotonic_Score = as.formula(
+      paste("Pre_Op_NNNS_Hypotonic_Score ~", basecov, "+ Post_Op_NNNS_Hypotonic_Score")
+    ),
+    Pre_Op_NNNS_Asymmetry_Score = as.formula(
+      paste("Pre_Op_NNNS_Asymmetry_Score ~", basecov, "+ Post_Op_NNNS_Asymmetry_Score")
+    ),
+    Pre_Op_NNNS_Excitability_Score = as.formula(
+      paste("Pre_Op_NNNS_Excitability_Score ~", basecov, "+ Post_Op_NNNS_Excitability_Score")
+    ),
+    Pre_Op_NNNS_Lethargy_Score = as.formula(
+      paste("Pre_Op_NNNS_Lethargy_Score ~", basecov, "+ Post_Op_NNNS_Lethargy_Score")
+    ),
+    Post_Op_NNNS_handling_score = as.formula(
+      paste("Post_Op_NNNS_handling_score ~", basecov, "+ Pre_Op_NNNS_handling_score")
+    ),
+    Post_Op_NNNS_Quality_of_Movement_Score = as.formula(
+      paste("Post_Op_NNNS_Quality_of_Movement_Score ~", basecov, "+ Pre_Op_NNNS_Quality_of_Movement_Score")
+    ),
+    Post_Op_NNNS_Regulation_Score = as.formula(
+      paste("Post_Op_NNNS_Regulation_Score ~", basecov, "+ Pre_Op_NNNS_Regulation_Score")
+    ),
+    Post_Op_NNNS_Non_Optimal_Reflexes_Score = as.formula(
+      paste("Post_Op_NNNS_Non_Optimal_Reflexes_Score ~", basecov, "+ Pre_Op_NNNS_Non_Optimal_Reflexes_Score")
+    ),
+    Post_Op_NNNS_Stress_Score = as.formula(
+      paste("Post_Op_NNNS_Stress_Score ~", basecov, "+ Pre_Op_NNNS_Stress_Score")
+    ),
+    Post_Op_NNNS_Arousal_Score = as.formula(
+      paste("Post_Op_NNNS_Arousal_Score ~", basecov, "+ Pre_Op_NNNS_Arousal_Score")
+    ),
+    Post_Op_NNNS_Hypertonic_Score = as.formula(
+      paste("Post_Op_NNNS_Hypertonic_Score ~", basecov, "+ Pre_Op_NNNS_Hypertonic_Score")
+    ),
+    Post_Op_NNNS_Hypotonic_Score = as.formula(
+      paste("Post_Op_NNNS_Hypotonic_Score ~", basecov, "+ Pre_Op_NNNS_Hypotonic_Score")
+    ),
+    Post_Op_NNNS_Asymmetry_Score = as.formula(
+      paste("Post_Op_NNNS_Asymmetry_Score ~", basecov, "+ Pre_Op_NNNS_Asymmetry_Score")
+    ),
+    Post_Op_NNNS_Excitability_Score = as.formula(
+      paste("Post_Op_NNNS_Excitability_Score ~", basecov, "+ Pre_Op_NNNS_Excitability_Score")
+    ),
+    Post_Op_NNNS_Lethargy_Score = as.formula(
+      paste("Post_Op_NNNS_Lethargy_Score ~", basecov, "+ Pre_Op_NNNS_Lethargy_Score")
+    ),
+    Pre_Op_NNNS_attention_score = as.formula(
+      paste("Pre_Op_NNNS_attention_score ~", basecov, "+ Post_Op_NNNS_attention_score + Pre_Op_NNNS_handling_score + Pre_Op_NNNS_Quality_of_Movement_Score + Pre_Op_NNNS_Regulation_Score + Pre_Op_NNNS_Non_Optimal_Reflexes_Score + Pre_Op_NNNS_Stress_Score + Pre_Op_NNNS_Arousal_Score + Pre_Op_NNNS_Hypertonic_Score + Pre_Op_NNNS_Hypotonic_Score + Pre_Op_NNNS_Asymmetry_Score + Pre_Op_NNNS_Excitability_Score + Pre_Op_NNNS_Lethargy_Score + Percent_of_feeds_taken_by_mouth_at_discharge")
+    ),
+    Post_Op_NNNS_attention_score = as.formula(
+      paste("Post_Op_NNNS_attention_score ~", basecov, "+ Pre_Op_NNNS_attention_score + Post_Op_NNNS_handling_score + Post_Op_NNNS_Quality_of_Movement_Score + Post_Op_NNNS_Regulation_Score + Post_Op_NNNS_Non_Optimal_Reflexes_Score + Post_Op_NNNS_Stress_Score + Post_Op_NNNS_Arousal_Score + Post_Op_NNNS_Hypertonic_Score + Post_Op_NNNS_Hypotonic_Score + Post_Op_NNNS_Asymmetry_Score + Post_Op_NNNS_Excitability_Score + Post_Op_NNNS_Lethargy_Score + Percent_of_feeds_taken_by_mouth_at_discharge")
+    ),
+    Percent_of_feeds_taken_by_mouth_at_discharge = as.formula(
+      paste0("Percent_of_feeds_taken_by_mouth_at_discharge ~", basecov, "+ Pre_Op_NNNS_attention_score + Post_Op_NNNS_attention_score")
+    )
+  )
+)
+```
+
