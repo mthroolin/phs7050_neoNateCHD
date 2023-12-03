@@ -586,10 +586,6 @@ nnns |>
 
 #### AUC of missing in one period from another
 
-We used the NNNS score to predict the missing of the same score in another period 
-and got AUCs ranging from 0.5 to 0.643, which means that same
-assessment item from different periods are not quite predictive to the missingness.
-
 ```{r}
 as.data.frame(t(apply(
   expand.grid(preop_nnns, postop_nnns), 1,
@@ -636,6 +632,120 @@ as.data.frame(t(apply(
   DT::datatable(filter = "top")
 ```
 
+```{r, eval=FALSE}
+sapply(
+  preop_nnns |> setdiff(c("Pre_Op_NNNS_attention_score", "Pre_Op_NNNS_habituation_score")),
+  \(y) {
+    roc_res <- pROC::roc(as.formula(paste0("is.na(", y, ") ~ Percent_of_feeds_taken_by_mouth_at_discharge")), data = nnns)
+    auc_est <- round(roc_res$auc, 3)
+    auc_ci <- round(pROC::ci.auc(roc_res), 3)
+    if(auc_est < 0.5) return(c(y, 1-auc_est, 1-auc_ci[2], 1-auc_ci[1]))
+    else return(c(y, auc_est, auc_ci[1], auc_ci[2]))
+  }
+)
+
+sapply(
+  preop_nnns |> setdiff(c("Pre_Op_NNNS_attention_score", "Pre_Op_NNNS_habituation_score")),
+  \(y) {
+    roc_res <- pROC::roc(as.formula(paste0("is.na(", y, ") ~ Length_of_Stay_days")), data = nnns)
+    auc_est <- round(roc_res$auc, 3)
+    auc_ci <- round(pROC::ci.auc(roc_res), 3)
+    if(auc_est < 0.5) return(c(y, 1-auc_est, 1-auc_ci[2], 1-auc_ci[1]))
+    else return(c(y, auc_est, auc_ci[1], auc_ci[2]))
+  }
+)
+
+
+sapply(
+  preop_nnns |> setdiff(c("Pre_Op_NNNS_attention_score", "Pre_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Pre_Op_attention_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+
+sapply(
+  preop_nnns |> setdiff(c("Pre_Op_NNNS_attention_score", "Pre_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Post_Op_attention_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+
+sapply(
+  preop_nnns |> setdiff(c("Pre_Op_NNNS_attention_score", "Pre_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Pre_Op_habituation_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+
+sapply(
+  preop_nnns |> setdiff(c("Pre_Op_NNNS_attention_score", "Pre_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Post_Op_habituation_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+```
+
+```{r, eval=FALSE}
+sapply(
+  postop_nnns |> setdiff(c("Post_Op_NNNS_attention_score", "Post_Op_NNNS_habituation_score")),
+  \(y) {
+    roc_res <- pROC::roc(as.formula(paste0("is.na(", y, ") ~ Percent_of_feeds_taken_by_mouth_at_discharge")), data = nnns)
+    auc_est <- round(roc_res$auc, 3)
+    auc_ci <- round(pROC::ci.auc(roc_res), 3)
+    if(auc_est < 0.5) return(c(y, 1-auc_est, 1-auc_ci[2], 1-auc_ci[1]))
+    else return(c(y, auc_est, auc_ci[1], auc_ci[2]))
+  }
+)
+
+sapply(
+  postop_nnns |> setdiff(c("Post_Op_NNNS_attention_score", "Post_Op_NNNS_habituation_score")),
+  \(y) {
+    roc_res <- pROC::roc(as.formula(paste0("is.na(", y, ") ~ Length_of_Stay_days")), data = nnns)
+    auc_est <- round(roc_res$auc, 3)
+    auc_ci <- round(pROC::ci.auc(roc_res), 3)
+    if(auc_est < 0.5) return(c(y, 1-auc_est, 1-auc_ci[2], 1-auc_ci[1]))
+    else return(c(y, auc_est, auc_ci[1], auc_ci[2]))
+  }
+)
+
+
+sapply(
+  postop_nnns |> setdiff(c("Post_Op_NNNS_attention_score", "Post_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Pre_Op_attention_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+
+sapply(
+  postop_nnns |> setdiff(c("Post_Op_NNNS_attention_score", "Post_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Post_Op_attention_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+
+sapply(
+  postop_nnns |> setdiff(c("Post_Op_NNNS_attention_score", "Post_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Pre_Op_habituation_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+
+sapply(
+  postop_nnns |> setdiff(c("Post_Op_NNNS_attention_score", "Post_Op_NNNS_habituation_score")),
+  \(y) {
+    outcome <- is.na(nnns[,y])
+    summary(glm(outcome ~ nnns$Post_Op_habituation_missing, family = "binomial"))$coefficients[2,4]
+  }
+)
+```
+
 ## Data Imputation
 
 1. For each of the variables with missing values, we will include 
@@ -658,88 +768,101 @@ basevar_imp <- c(
 ) |> paste(collapse = " + ")
 
 nnns_mice <- mice(
-  nnns.not.imputed, 
+  nnns, 
   # avoid imputing the date variables
-  where = as.data.frame.array(is.na(nnns.not.imputed)) |>
+  where = as.data.frame.array(is.na(nnns)) |>
     mutate_at(vars(starts_with("Date")), \(x) x = FALSE),
   m = 20, maxit = 10, seed = 7050, print = F,
   formulas = list(
+    # ---- formula for pre-op scores ----
     Pre_Op_NNNS_handling_score = as.formula(
-      paste("Pre_Op_NNNS_handling_score ~", basecov, "+ Post_Op_NNNS_handling_score")
+      paste("Pre_Op_NNNS_handling_score ~", basevar_imp, "+ Pre_Op_habituation_missing + Post_Op_attention_missing + Post_Op_habituation_missing")
     ),
     Pre_Op_NNNS_Quality_of_Movement_Score = as.formula(
-      paste("Pre_Op_NNNS_Quality_of_Movement_Score ~", basevar_imp, "+ Post_Op_NNNS_Quality_of_Movement_Score")
+      paste("Pre_Op_NNNS_Quality_of_Movement_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Regulation_Score = as.formula(
-      paste("Pre_Op_NNNS_Regulation_Score ~", basecov, "+ Post_Op_NNNS_Regulation_Score")
+      paste("Pre_Op_NNNS_Regulation_Score ~", basevar_imp, "+ Pre_Op_habituation_missing + Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Non_Optimal_Reflexes_Score = as.formula(
-      paste("Pre_Op_NNNS_Non_Optimal_Reflexes_Score ~", basecov, "+ Post_Op_NNNS_Non_Optimal_Reflexes_Score")
+      paste("Pre_Op_NNNS_Non_Optimal_Reflexes_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Stress_Score = as.formula(
-      paste("Pre_Op_NNNS_Stress_Score ~", basecov, "+ Post_Op_NNNS_Stress_Score")
+      paste("Pre_Op_NNNS_Stress_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Arousal_Score = as.formula(
-      paste("Pre_Op_NNNS_Arousal_Score ~", basecov, "+ Post_Op_NNNS_Arousal_Score")
+      paste("Pre_Op_NNNS_Arousal_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Hypertonic_Score = as.formula(
-      paste("Pre_Op_NNNS_Hypertonic_Score ~", basecov, "+ Post_Op_NNNS_Hypertonic_Score")
+      paste("Pre_Op_NNNS_Hypertonic_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Hypotonic_Score = as.formula(
-      paste("Pre_Op_NNNS_Hypotonic_Score ~", basecov, "+ Post_Op_NNNS_Hypotonic_Score")
+      paste("Pre_Op_NNNS_Hypotonic_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Asymmetry_Score = as.formula(
-      paste("Pre_Op_NNNS_Asymmetry_Score ~", basecov, "+ Post_Op_NNNS_Asymmetry_Score")
+      paste("Pre_Op_NNNS_Asymmetry_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Excitability_Score = as.formula(
-      paste("Pre_Op_NNNS_Excitability_Score ~", basecov, "+ Post_Op_NNNS_Excitability_Score")
+      paste("Pre_Op_NNNS_Excitability_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
     Pre_Op_NNNS_Lethargy_Score = as.formula(
-      paste("Pre_Op_NNNS_Lethargy_Score ~", basecov, "+ Post_Op_NNNS_Lethargy_Score")
+      paste("Pre_Op_NNNS_Lethargy_Score ~", basevar_imp, "+ Post_Op_attention_missing")
     ),
+    # ---- formula for post-op scores ----
     Post_Op_NNNS_handling_score = as.formula(
-      paste("Post_Op_NNNS_handling_score ~", basecov, "+ Pre_Op_NNNS_handling_score")
+      paste("Post_Op_NNNS_handling_score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Post_Op_attention_missing")
     ),
     Post_Op_NNNS_Quality_of_Movement_Score = as.formula(
-      paste("Post_Op_NNNS_Quality_of_Movement_Score ~", basecov, "+ Pre_Op_NNNS_Quality_of_Movement_Score")
+      paste("Post_Op_NNNS_Quality_of_Movement_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Regulation_Score = as.formula(
-      paste("Post_Op_NNNS_Regulation_Score ~", basecov, "+ Pre_Op_NNNS_Regulation_Score")
+      paste("Post_Op_NNNS_Regulation_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Non_Optimal_Reflexes_Score = as.formula(
-      paste("Post_Op_NNNS_Non_Optimal_Reflexes_Score ~", basecov, "+ Pre_Op_NNNS_Non_Optimal_Reflexes_Score")
+      paste("Post_Op_NNNS_Non_Optimal_Reflexes_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Stress_Score = as.formula(
-      paste("Post_Op_NNNS_Stress_Score ~", basecov, "+ Pre_Op_NNNS_Stress_Score")
+      paste("Post_Op_NNNS_Stress_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Arousal_Score = as.formula(
-      paste("Post_Op_NNNS_Arousal_Score ~", basecov, "+ Pre_Op_NNNS_Arousal_Score")
+      paste("Post_Op_NNNS_Arousal_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Hypertonic_Score = as.formula(
-      paste("Post_Op_NNNS_Hypertonic_Score ~", basecov, "+ Pre_Op_NNNS_Hypertonic_Score")
+      paste("Post_Op_NNNS_Hypertonic_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Hypotonic_Score = as.formula(
-      paste("Post_Op_NNNS_Hypotonic_Score ~", basecov, "+ Pre_Op_NNNS_Hypotonic_Score")
+      paste("Post_Op_NNNS_Hypotonic_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Asymmetry_Score = as.formula(
-      paste("Post_Op_NNNS_Asymmetry_Score ~", basecov, "+ Pre_Op_NNNS_Asymmetry_Score")
+      paste("Post_Op_NNNS_Asymmetry_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Excitability_Score = as.formula(
-      paste("Post_Op_NNNS_Excitability_Score ~", basecov, "+ Pre_Op_NNNS_Excitability_Score")
+      paste("Post_Op_NNNS_Excitability_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
     Post_Op_NNNS_Lethargy_Score = as.formula(
-      paste("Post_Op_NNNS_Lethargy_Score ~", basecov, "+ Pre_Op_NNNS_Lethargy_Score")
+      paste("Post_Op_NNNS_Lethargy_Score ~", basevar_imp, "+ Percent_of_feeds_taken_by_mouth_at_discharge + Pre_Op_habituation_missing + Pre_Op_attention_missing")
     ),
+    # ---- formula for attention and % oral feed ----
     Pre_Op_NNNS_attention_score = as.formula(
-      paste("Pre_Op_NNNS_attention_score ~", basecov, "+ Post_Op_NNNS_attention_score + Pre_Op_NNNS_handling_score + Pre_Op_NNNS_Quality_of_Movement_Score + Pre_Op_NNNS_Regulation_Score + Pre_Op_NNNS_Non_Optimal_Reflexes_Score + Pre_Op_NNNS_Stress_Score + Pre_Op_NNNS_Arousal_Score + Pre_Op_NNNS_Hypertonic_Score + Pre_Op_NNNS_Hypotonic_Score + Pre_Op_NNNS_Asymmetry_Score + Pre_Op_NNNS_Excitability_Score + Pre_Op_NNNS_Lethargy_Score + Percent_of_feeds_taken_by_mouth_at_discharge")
+      paste("Pre_Op_NNNS_attention_score ~", basevar_imp, "+ postop_nnns_missing + Pre_Op_NNNS_Regulation_Score + Pre_Op_NNNS_Non_Optimal_Reflexes_Score + Pre_Op_NNNS_Lethargy_Score + Post_Op_NNNS_Regulation_Score")
     ),
     Post_Op_NNNS_attention_score = as.formula(
-      paste("Post_Op_NNNS_attention_score ~", basecov, "+ Pre_Op_NNNS_attention_score + Post_Op_NNNS_handling_score + Post_Op_NNNS_Quality_of_Movement_Score + Post_Op_NNNS_Regulation_Score + Post_Op_NNNS_Non_Optimal_Reflexes_Score + Post_Op_NNNS_Stress_Score + Post_Op_NNNS_Arousal_Score + Post_Op_NNNS_Hypertonic_Score + Post_Op_NNNS_Hypotonic_Score + Post_Op_NNNS_Asymmetry_Score + Post_Op_NNNS_Excitability_Score + Post_Op_NNNS_Lethargy_Score + Percent_of_feeds_taken_by_mouth_at_discharge")
+      paste("Post_Op_NNNS_attention_score ~", basevar_imp, "+ preop_nnns_missing + Post_Op_NNNS_Quality_of_Movement_Score + Post_Op_NNNS_Regulation_Score + Post_Op_NNNS_Non_Optimal_Reflexes_Score +  Post_Op_NNNS_Excitability_Score + Post_Op_NNNS_Lethargy_Score + Pre_Op_NNNS_handling_score")
     ),
     Percent_of_feeds_taken_by_mouth_at_discharge = as.formula(
-      paste0("Percent_of_feeds_taken_by_mouth_at_discharge ~", basecov, "+ Pre_Op_NNNS_attention_score + Post_Op_NNNS_attention_score")
+      paste0("Percent_of_feeds_taken_by_mouth_at_discharge ~", basevar_imp, "+ GI_Complication + Post_Op_NNNS_Stress_Score + Post_Op_NNNS_Asymmetry_Score + Post_Op_NNNS_Non_Optimal_Reflexes_Score + Post_Op_habituation_missing")
     )
   )
 )
+
+# confirm all the missing values are imputed
+lapply(1:20, \(i) table(colSums(is.na(complete(nnns_mice, i))) == 0))
+# confirm the imputed values in % oral feed are within the range of 0 and 1
+sapply(1:20, \(i) range(complete(nnns_mice, i)$Percent_of_feeds_taken_by_mouth_at_discharge))
+
+# save the imputed data
+saveRDS(nnns_mice, "nnns_imputed.rds")
 ```
+
+
 
