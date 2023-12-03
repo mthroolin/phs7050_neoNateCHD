@@ -6,8 +6,6 @@ output: pdf_document
 ---
 
 ```{r}
-library(KMsurv)
-library(survminer)
 library(survival)
 library(tidyverse)
 library(lubridate)
@@ -31,11 +29,12 @@ data$Date.end <- mdy(data$Date.end)
 #str(data)
 #get the observed survive time
 data$obs_time <- as.numeric(interval(data$Date.PO.feeds.started,data$Date.end),"days")
+data$Cardiac.Anatomy <- as.factor(data$Cardiac.Anatomy)
 ```
 
 ```{r}
 #univariate models
-covariates <- colnames(data[c(1:9,12:13)])
+covariates <- colnames(data[c(1:4,6:9,12:13)])
 univ_formulas <- sapply(covariates,
                         function(x) as.formula(paste('Surv(obs_time, status)~', x)))
                         
@@ -59,5 +58,8 @@ univ_results <- lapply(univ_models,
                          })
 res <- t(as.data.frame(univ_results, check.names = FALSE))
 as.data.frame(res)
+
+res.car <- coxph(Surv(obs_time, status) ~ Cardiac.Anatomy, data = data)
+res.car
 ```
 
