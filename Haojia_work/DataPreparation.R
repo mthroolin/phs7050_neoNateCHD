@@ -1,6 +1,7 @@
 library(tidyverse)
 library(mice) # imputation
 
+nnns0 <- read.csv("NNNS_score_data.csv")
 # clean up variable names
 # remove the dots at the end of variable names
 colnames(nnns0) <- gsub("\\.+$", "", colnames(nnns0))
@@ -45,10 +46,16 @@ nnns <- nnns0 |>
   # drop unnecessary variables
   select(!c(
     "sex_1_M_2_F", # use Female instead
-    "Intubated_Pre_operatively", "bypass_used", "bypass_time_min", # not of interest 
+    # "Intubated_Pre_operatively", "bypass_used", "bypass_time_min", # not of interest 
     "Neurologic_Complication", "AirwayAnomalyYN" # already excluded
   )) 
 
+# dichotomize attention scores
+nnns <- nnns |>
+  mutate(Pre_op_attention_2cat = ifelse(is.na(Pre_Op_NNNS_attention_score) | Pre_Op_NNNS_attention_score <= 3, 0, 1),
+         Post_op_attention_2cat = ifelse(is.na(Post_Op_NNNS_attention_score) | Post_Op_NNNS_attention_score <= 4, 0, 1))
+
+saveRDS(nnns, "nnns_attention_2cat.rds")
 
 nnns <- nnns |>
   # create indicator of missing pre-op and post-op habituation score
@@ -171,3 +178,4 @@ nnns_mice <- mice(
 
 # save the imputed data
 # saveRDS(nnns_mice, "nnns_imputed.rds")
+
