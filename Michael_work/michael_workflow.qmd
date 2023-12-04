@@ -70,7 +70,7 @@ tictoc::tic()
 pre_op_model =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
             ~Pre_Op_NNNS_attention_score+
               Length_of_intubation_days+
-              Genetic_Syndrome_or_Chromosomal_Abnormality+
+              #Genetic_Syndrome_or_Chromosomal_Abnormality+
               Cardiac_Anatomy+
               Age_at_Surgery_days+
               Female
@@ -78,13 +78,13 @@ pre_op_model =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
        | 1 #x2 design matrix- estimating variance
      |Pre_Op_NNNS_attention_score+
               Length_of_intubation_days+
-              Genetic_Syndrome_or_Chromosomal_Abnormality+
+              #Genetic_Syndrome_or_Chromosomal_Abnormality+
               Cardiac_Anatomy+
               Age_at_Surgery_days+
               Female #x3 design matrix
      |Pre_Op_NNNS_attention_score+
               Length_of_intubation_days+
-              Genetic_Syndrome_or_Chromosomal_Abnormality+
+              #Genetic_Syndrome_or_Chromosomal_Abnormality+
               Cardiac_Anatomy+
               Age_at_Surgery_days+
               Female, #x4 design matrix
@@ -97,7 +97,7 @@ pre_op_model =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
      link.x1 =  "logit",
      random = 0,
      n.chain = 4, # number of MCMC chains
-     n.iter = 5000, #number of iterations before burn/thin
+     n.iter = 3000, #number of iterations before burn/thin
      n.thin = 2, # thinning period
      n.burn = 200, # burn-in period 
      seeds = c(11,29,20,23) #vector of seeds for chains to make reproducable
