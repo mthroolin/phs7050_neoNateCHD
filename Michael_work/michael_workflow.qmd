@@ -20,71 +20,22 @@ library(tidyverse)
 library(GGally)
 library(ggpubr)
 library(kableExtra)
+library(mice)
 
 theme_set(theme_pubr(legend = "bottom"))
 
-# read in raw data
-nnns0 <- read.csv("../NNNS_score_data.csv")
+
+nnns_imputed<- readRDS("../Haojia_work/nnns_imputed.rds")
+
+
 ```
 
-# Using Haojia's data cleaning:
-```{r dataclean}
-#| label: data cleaning
-#| results: "hide"
+# read imputed data
+```{r readin}
 
-# clean up variable names
-# remove the dots at the end of variable names
-colnames(nnns0) <- gsub("\\.+$", "", colnames(nnns0))
-# replace all the dots in variable names with underscores
-colnames(nnns0) <- gsub("\\.+", "_", colnames(nnns0))
+dat=complete(nnns_imputed,1)
+attach(dat);Percent_of_feeds_taken_by_mouth_at_discharge
 
-nnns <- nnns0 |> 
-  filter(
-    # exclude neurologic or airway anomaly
-    Neurologic_Complication == 0, AirwayAnomalyYN == 0,
-    # include infants from birth to 4 weeks old
-    # there are two outliers with age at surgery > 30 days
-    Age_at_Surgery_days <= 30
-  ) |>
-  # some binary variables have values of 1/2 or Y/N, recode them to 0/1
-  mutate(
-    Female = as.integer(sex_1_M_2_F == 2),
-    Premature = as.integer(Premature == 1),
-    Extubation_failure = as.integer(Extubation_failure == "Y"),
-  ) |>
-  
-  # relabel cardiac anatomy
-  mutate(
-    Cardiac_Anatomy = factor(
-      Cardiac_Anatomy, levels = 1:4,
-      labels = c(
-        "Single ventricle w/o arch obstruction",
-        "Single ventricle w/ arch obstruction",
-        "Two ventricle w/o arch obstruction",
-        "Two ventricle w/ arch obstruction"
-      )
-    ),
-    # for model building purposes, combine the 2 levels w/o arch obstruction
-    Cardiac_Anatomy_collapsed = fct_collapse(
-      Cardiac_Anatomy,
-      "W/o arch obstruction" = c("Single ventricle w/o arch obstruction", "Two ventricle w/o arch obstruction"),
-      "Single ventricle w/ arch obstruction" = "Single ventricle w/ arch obstruction",
-      "Two ventricle w/ arch obstruction" = "Two ventricle w/ arch obstruction"
-    )
-  ) |>
-  
-  # convert date variables to date class
-  mutate_at(
-    vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), 
-    as_date, format = "%m/%d/%Y"
-  )
-
-# drop unnecessary variables
-nnns <- nnns |> select(!c(
-  "sex_1_M_2_F", # use Female instead
-  "Intubated_Pre_operatively", "bypass_used", "bypass_time_min", # not of interest 
-  "Neurologic_Complication", "AirwayAnomalyYN" # already excluded
-)) 
 ```
 
 
@@ -116,28 +67,28 @@ $$
 set.seed(11282023) #Set seed, bayesian model!
 
 tictoc::tic()
-model1 =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
+pre_op_model =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
             ~Pre_Op_NNNS_attention_score+
-              Post_Op_NNNS_attention_score+
-              Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
-              Age_at_Surgery_days+Cardiac_Anatomy+
-              Length_of_intubation_days+Length_of_Stay_days+
-              Extubation_failure+GI_Complication+Premature
+              Length_of_intubation_days+
+              #Genetic_Syndrome_or_Chromosomal_Abnormality+
+              Cardiac_Anatomy+
+              Age_at_Surgery_days+
+              Female
               #x1 design matrix
        | 1 #x2 design matrix- estimating variance
      |Pre_Op_NNNS_attention_score+
-              Post_Op_NNNS_attention_score+
-              Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
-              Age_at_Surgery_days+Cardiac_Anatomy+
-              Length_of_intubation_days+Length_of_Stay_days+
-              Extubation_failure+GI_Complication+Premature #x3 design matrix
+              Length_of_intubation_days+
+              #Genetic_Syndrome_or_Chromosomal_Abnormality+
+              Cardiac_Anatomy+
+              Age_at_Surgery_days+
+              Female #x3 design matrix
      |Pre_Op_NNNS_attention_score+
-              Post_Op_NNNS_attention_score+
-              Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
-              Age_at_Surgery_days+Cardiac_Anatomy+
-              Length_of_intubation_days+Length_of_Stay_days+
-              Extubation_failure+GI_Complication+Premature, #x4 design matrix
-     data = nnns,
+              Length_of_intubation_days+
+              #Genetic_Syndrome_or_Chromosomal_Abnormality+
+              Cardiac_Anatomy+
+              Age_at_Surgery_days+
+              Female, #x4 design matrix
+     data = dat,
      n.response = 1,
      zero.inflation = TRUE,
      one.inflation = TRUE,
@@ -146,13 +97,13 @@ model1 =zoib(Percent_of_feeds_taken_by_mouth_at_discharge #Response
      link.x1 =  "logit",
      random = 0,
      n.chain = 4, # number of MCMC chains
-     n.iter = 10000, #number of iterations before burn/thin
-     n.thin = 10, # thinning period
-     n.burn = 5000, # burn-in period 
+     n.iter = 3000, #number of iterations before burn/thin
+     n.thin = 2, # thinning period
+     n.burn = 200, # burn-in period 
      seeds = c(11,29,20,23) #vector of seeds for chains to make reproducable
      )
 tictoc::toc()
-saveRDS(model1, file="model1.RData")
+saveRDS(pre_op_model, file="model1.RData")
 ```
 
 
@@ -184,7 +135,3 @@ traceplot(model1$coeff)
 autocorr.plot(model1$coeff)
 ```
 
-### Gelman Plot
-```{r}
-gelman.diag(model1$coeff)
-```
