@@ -1,0 +1,310 @@
+---
+title: "Bayesian Checks"
+format:
+  html:
+    embed-resources: true
+    self-contained-math: true
+    code-fold: true
+    code-summary: "Show the code"
+    toc: true
+    toc-depth: 6
+    toc-location: left
+execute:
+  warning: false
+  message: false
+  cache: true
+---
+
+```{r setup}
+library(zoib)
+library(tidyverse)
+library(GGally)
+library(ggpubr)
+library(kableExtra)
+library(mice)
+library(parallel)
+
+theme_set(theme_pubr(legend = "bottom"))
+```
+
+# read imputed data
+```{r readin}
+#| eval: false
+
+nnns_imputed<- readRDS("../Haojia_work/nnns_imputed.rds")
+
+dat <- lapply(1:20, function(i) complete(nnns_imputed, i))
+```
+
+
+
+# Use ZOIB package
+
+## ZOIB Model
+
+$$
+f(y_i|\eta_i) = \begin{cases}
+p_i, & y_i =0 \\
+(1-p_i)q_i, & y_i =1 \\
+(1 − p_i)(1 − q_i)Beta(\alpha_{i_1}, \alpha_{i_2}) &y_i \in (0, 1)
+\end{cases}
+$$
+
+$$
+\begin{aligned}
+logit\left(\mu^{(0,1)} = \frac{\alpha_1}{\alpha_1+ \alpha_2}\right) = \mathbf x_1 \boldsymbol \beta_1 + I_1(\mathbf z_{1,i}\gamma_{1,i}) \\
+log\left(v_i = \alpha_1+ \alpha_2\right) = \mathbf x_2 \boldsymbol \beta_2 + I_2(\mathbf z_{2,i}\gamma_{2,i}) \\
+logit\left(p_i\right) = \mathbf x_3 \boldsymbol \beta_3 + I_1(\mathbf z_{3,i}\gamma_{3,i}) \\
+logit\left(q_i\right) = \mathbf x_4 \boldsymbol \beta_4 + I_1(\mathbf z_{4,i}\gamma_{4 ,i})
+\end{aligned}
+$$
+
+## Fit ZOIB model
+
+```{r preop}
+#| eval: false
+set.seed(11282023)
+
+tictoc::tic()
+
+# Define a function for model fitting
+fit_model <- function(d) {
+  zoib(
+    Percent_of_feeds_taken_by_mouth_at_discharge ~
+      Pre_Op_NNNS_attention_score +
+      Length_of_intubation_days +
+      Cardiac_Anatomy +
+      Age_at_Surgery_days +
+      Female #x1 design matrix
+    | 1 | #x2 design matrix
+      Pre_Op_NNNS_attention_score +
+      Length_of_intubation_days +
+      Cardiac_Anatomy +
+      Age_at_Surgery_days +
+      Female | #X3 design matrix
+      Pre_Op_NNNS_attention_score +
+      Length_of_intubation_days +
+      Cardiac_Anatomy +
+      Age_at_Surgery_days +
+      Female, #x4 design matrix
+    data = d,
+    n.response = 1,
+    zero.inflation = TRUE,
+    one.inflation = TRUE,
+    link.mu = "logit",
+    link.x0 = "logit",
+    link.x1 = "logit",
+    random = 0,
+    n.chain = 4,
+    n.iter = 3000,
+    n.thin = 2,
+    n.burn = 200,
+    seeds = c(11, 29, 20, 23)
+  )
+}
+model_results <- lapply(dat, fit_model)
+# Save results
+saveRDS(model_results, "pre_op_models.rds")
+
+tictoc::toc()
+```
+
+
+```{r postop}
+#| eval: false
+set.seed(11282023)
+
+tictoc::tic()
+
+# Define a function for model fitting
+fit_model <- function(d) {
+  zoib(
+    Percent_of_feeds_taken_by_mouth_at_discharge ~
+      Post_Op_NNNS_attention_score +
+      Length_of_intubation_days +
+      Cardiac_Anatomy +
+      Age_at_Surgery_days +
+      Female #x1 design matrix
+    | 1 | #x2 design matrix
+      Post_Op_NNNS_attention_score +
+      Length_of_intubation_days +
+      Cardiac_Anatomy +
+      Age_at_Surgery_days +
+      Female | #X3 design matrix
+      Post_Op_NNNS_attention_score +
+      Length_of_intubation_days +
+      Cardiac_Anatomy +
+      Age_at_Surgery_days +
+      Female, #x4 design matrix
+    data = d,
+    n.response = 1,
+    zero.inflation = TRUE,
+    one.inflation = TRUE,
+    link.mu = "logit",
+    link.x0 = "logit",
+    link.x1 = "logit",
+    random = 0,
+    n.chain = 4,
+    n.iter = 3000,
+    n.thin = 2,
+    n.burn = 200,
+    seeds = c(11, 29, 20, 23)
+  )
+}
+
+# Parallelize model fitting
+model_results <- lapply(dat, fit_model)
+
+# Save results
+saveRDS(model_results, "post_op_models.rds")
+
+tictoc::toc()
+```
+
+
+
+
+
+## Interpreting output:
+
+b: vector of estimates from Eqn 1; that is, g(mu) = xb\*b +z\*gamma
+
+d: vector of estimates from Eqn 2; that is, log(eta) = xd\*d+z\*gamma
+
+b0: vector of estimates from Eqn 3; that is, g(p0) = x0\*b0 +z\*gamma
+
+b1: vector of estimates from Eqn ;4 that is, g(p1) = x1\*b1+z\*gamma
+
+
+# Pool chains
+```{r model_results}
+#| eval: false
+post_op_models =readRDS(file="post_op_models.rds")
+pre_op_models =readRDS(file="pre_op_models.rds")
+
+post_op_coeff = list()
+pre_op_coeff = list()
+for(i in 1:length(post_op_models)){
+  pre_op_coeff[[i]] = pre_op_models[[i]]$coeff
+  post_op_coeff[[i]] = post_op_models[[i]]$coeff
+}
+pooled_pre_op = runjags::combine.mcmc(mcmc.objects = pre_op_coeff, collapse.chains = FALSE)
+pooled_post_op = runjags::combine.mcmc(mcmc.objects = post_op_coeff, collapse.chains = FALSE)
+
+saveRDS(pooled_pre_op, "pooled_pre_op.rds")
+saveRDS(pooled_post_op, "pooled_post_op.rds")
+```
+
+```{r}
+pooled_pre_op = readRDS("pooled_pre_op.rds")
+pooled_post_op = readRDS("pooled_post_op.rds")
+```
+
+## Check convergence
+
+### Traceplots
+
+#### Pre-op
+```{r}
+pooled_pre_op |> traceplot()
+```
+
+#### Post-op
+```{r}
+pooled_post_op |> traceplot()
+```
+
+### Autocorrelation plots
+
+#### Pre-op
+```{r}
+pooled_pre_op |> autocorr.plot()
+```
+#### Post-op
+```{r}
+pooled_post_op |> autocorr.plot()
+```
+
+
+# Summary table
+```{r}
+summary_pooled_pre_op = pooled_pre_op |> summary()
+summary_pooled_post_op = pooled_post_op |> summary()
+
+rnames = c("Baseline","Attention Score","Length of Intubation (d)",
+           "Single Ventricle w/ Arch Obstruction","Two Ventricles w/ Arch Obstruction",
+           "Age", "Female")
+
+pre_mean = summary_pooled_pre_op$statistics[,"Mean"]
+pre_lb = summary_pooled_pre_op$quantiles[,"2.5%"] 
+pre_ub = summary_pooled_pre_op$quantiles[,"97.5%"]
+
+
+
+post_mean = summary_pooled_post_op$statistics[,"Mean"]
+post_lb   = summary_pooled_post_op$quantiles[,"2.5%"] 
+post_ub   = summary_pooled_post_op$quantiles[,"97.5%"] 
+
+
+pre_b_df= cbind("Mean"= pre_mean[1:7] |> exp() |> round(2),
+                 "2.5%"= pre_lb[1:7] |> exp() |> round(2),
+                 "97.5%" = pre_ub[1:7] |> exp() |> round(2))
+
+pre_b0_df= cbind("Mean"= pre_mean[8:14] |> exp() |> round(2),
+               "2.5%"= pre_lb[8:14] |> exp() |> round(2),
+               "97.5%" = pre_ub[8:14] |> exp() |> round(2))
+pre_b1_df= cbind("Mean"= pre_mean[15:21] |> exp() |> round(2),
+               "2.5%"= pre_lb[15:21] |> exp() |> round(2),
+               "97.5%" = pre_ub[15:21] |> exp() |> round(2))
+
+pre_df = cbind(pre_b_df,pre_b0_df,pre_b1_df)
+rownames(pre_df) = rnames
+
+
+
+post_b_df= cbind("Mean"= post_mean[1:7] |> exp() |> round(2),
+                 "2.5%"= post_lb[1:7] |> exp() |> round(2),
+                 "97.5%" = post_ub[1:7] |> exp() |> round(2))
+
+post_b0_df= cbind("Mean"= post_mean[8:14] |> exp() |> round(2),
+               "2.5%"= post_lb[8:14] |> exp() |> round(2),
+               "97.5%" = post_ub[8:14] |> exp() |> round(2))
+post_b1_df= cbind("Mean "= post_mean[15:21] |> exp() |> round(2),
+               "2.5%"= post_lb[15:21] |> exp() |> round(2),
+               "97.5%" = post_ub[15:21] |> exp() |> round(2))
+
+post_df = cbind(post_b_df,post_b0_df,post_b1_df)
+rownames(post_df) = rnames
+
+
+pre_kable = pre_df |>
+  kable(caption = "Odds Ratio of Percent Oral Feed Model Results (Pre-Operation)") |>
+  add_header_above(header = c("Predictor" = 1,
+                            "Odds of Oral Feed \n when oral feed between 0 and 1" = 3,
+                              "Odds of 0% Oral Feed" = 3,
+                              "Odds of 100% Oral Feed" =3)) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) |>
+  add_footnote(paste("Posterior variance is estimated to be ", pre_mean[22] |> exp() |> round(2),
+                     " (",pre_lb[22] |> exp() |> round(2),",", pre_ub[22]|> exp()|> round(2),")"))
+
+post_kable = post_df |>
+  kable(caption = "Odds Ratio of Percent Oral Feed Model Results (Post-Operation)") |>
+  add_header_above(header = c("Predictor" = 1,
+                            "Odds of Oral Feed \n when oral feed between 0 and 1" = 3,
+                              "Odds of 0% Oral Feed" = 3,
+                              "Odds of 100% Oral Feed" =3)) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))|>
+  add_footnote(paste("Posterior variance is estimated to be ", post_mean[22] |> exp() |> round(2),
+                     " (",post_lb[22] |> exp() |> round(2),",", post_ub[22]|> exp()|> round(2),")"))
+```
+
+## Pre-operation
+```{r}
+pre_kable
+```
+
+## Post-operation
+```{r}
+post_kable
+```
+
