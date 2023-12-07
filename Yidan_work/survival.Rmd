@@ -1,0 +1,167 @@
+---
+title: "survival"
+author: "Yidan Zhang"
+date: '2023-12-05'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(mice)
+library(dplyr)
+library(gtsummary)
+library(KMsurv)
+library(casebase)
+library(survival)
+library(tidycmprsk)
+library(ggsurvfit)
+```
+
+```{r}
+complete(nnns_imputed,1)
+
+#nnns_imputed <- as.mids(nnns_imputed)
+
+long <- complete(nnns_imputed, action='long',include=TRUE)
+
+long <- long %>% 
+  filter(!(is.na(Date_Identified_as_not_yet_full_PO)&is.na(Date_Reaching_Full_PO))) %>%
+  filter(!(is.na(Date_PO_feeds_started))) %>%
+  mutate(status=ifelse(is.na(Date_Reaching_Full_PO),1,0)) %>% #censor=0,event=1
+  mutate(Date_end= coalesce(Date_Identified_as_not_yet_full_PO,Date_Reaching_Full_PO)) %>%
+  mutate(obs_time=as.numeric(interval(Date_PO_feeds_started,Date_end),"days"))
+
+imput_back <- as.mids(long)
+
+#set aside an imputed data frame for comparison
+compare <- long[long$.imp==1,]
+#univariate analysis
+
+covariates <- c("Age_at_Surgery_days","Premature","Genetic_Syndrome_or_Chromosomal_Abnormality",
+                "GI_Complication","Length_of_Stay_days","Cardiac_Anatomy",
+                "Length_of_intubation_days","Extubation_failure","Female",
+                "obs_time","status","Pre_Op_NNNS_attention_score","Post_Op_NNNS_attention_score")
+
+table_uni <- tbl_uvregression(compare[covariates], survival::coxph, 
+                 y=Surv(obs_time,status), exponentiate = TRUE,
+                 pvalue_fun = function(x) style_pvalue(x, digits = 2),
+                 label = list(Age_at_Surgery_days ~ "Age at Surgery days",
+                              Genetic_Syndrome_or_Chromosomal_Abnormality ~ "Genetic Syndrome or Chromosomal Abnormality",
+                              GI_Complication~"Gastrointestinal complication",
+                              Length_of_Stay_days~"Length of Stay(days)"))%>%
+  add_global_p() %>%
+  bold_p(t = 0.05) %>%
+  bold_labels() %>%
+  italicize_levels() 
+table_uni
+
+#create survival curves
+
+cuminc(Surv(obs_time, factor(status)) ~ 1, compare) %>%
+  ggcuminc() +
+  add_confidence_interval() +
+  add_risktable(risktable_stats = c("{n.risk}","{cum.event}"),
+                stats_label = c("N not yet achieve oral feeds",
+                                "N achieve oral feeds"),
+                size = 6) +
+  scale_ggsurvfit()+
+  labs(title = "Cumulative Incidence Curve for the time to achieve full oral feeds")+
+  theme(plot.title = element_text(size=22))
+
+
+res_imp_pre <- with(imput_back,coxph(Surv(obs_time,status)~Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+                                   Age_at_Surgery_days+Cardiac_Anatomy+Pre_Op_NNNS_attention_score+
+                                   Length_of_intubation_days+Length_of_Stay_days))
+
+sum_imp_pre <- summary(pool(res_imp_pre))
+
+
+
+manualCI <- function(model_object, ci = 0.95){
+  a <- summary(model_object)
+  mult <- qnorm((1 + ci) / 2)
+  restab <- with(as.data.frame(a),
+                 cbind(est = round(exp(estimate),2),
+                       lwr = round(exp(estimate - mult*std.error),2),
+                       upr = round(exp(estimate + mult*std.error),2)))
+  rownames(restab) <- rownames(a)
+  return(data.frame(restab))
+}
+
+sum_imp_pre
+manualCI(pool(res_imp_pre))
+
+##impute post score
+res_imp_post <- with(imput_back,coxph(Surv(obs_time,status)~Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+                                   Age_at_Surgery_days+Cardiac_Anatomy+Post_Op_NNNS_attention_score+
+                                   Length_of_intubation_days+Length_of_Stay_days))
+
+summary(pool(res_imp_post))
+manualCI(pool(res_imp_post))
+
+```
+
+```{r}
+###dichotomized attention score
+data_dich <- nnns_attention_2cat %>% 
+  filter(!(is.na(Date_Identified_as_not_yet_full_PO)&is.na(Date_Reaching_Full_PO))) %>%
+  filter(!(is.na(Date_PO_feeds_started))) %>%
+  mutate(status=ifelse(is.na(Date_Reaching_Full_PO),0,1)) %>% #censor=0,event=1
+  mutate(Date_end= coalesce(Date_Identified_as_not_yet_full_PO,Date_Reaching_Full_PO)) %>%
+  mutate(obs_time=as.numeric(interval(Date_PO_feeds_started,Date_end),"days"))
+
+#pre
+res_dich_pre <- with(data_dich,coxph(Surv(obs_time,status)~Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+                                   Age_at_Surgery_days+Cardiac_Anatomy+Pre_op_attention_2cat+
+                                   Length_of_intubation_days+Length_of_Stay_days))
+
+summary(res_dich_pre)#second part is HR and CI of HR
+cz_dich_pre <- cox.zph(res_dich_pre)
+print(cz_dich_pre)
+plot(cz_dich_pre)
+#post
+res_dich_post <- with(data_dich,coxph(Surv(obs_time,status)~Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+                                   Age_at_Surgery_days+Cardiac_Anatomy+Post_op_attention_2cat+
+                                   Length_of_intubation_days+Length_of_Stay_days))
+
+summary(res_dich_post)#second part is HR and CI of HR
+cz_dich_post <- cox.zph(res_dich_post)
+print(cz_dich_post)
+plot(cz_dich_post)
+
+```
+
+```{r}
+###for none missing score
+nonmissing <- long[long$.imp==0,]
+
+#pre
+nonmiss_pre <- nonmissing[!is.na(nonmissing$Pre_Op_NNNS_attention_score),]
+dim(nonmiss_pre) #53
+res_nonmiss_pre <- with(nonmiss_pre,coxph(Surv(obs_time,status)~Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+                                   Age_at_Surgery_days+Cardiac_Anatomy+Pre_Op_NNNS_attention_score+
+                                   Length_of_intubation_days+Length_of_Stay_days))
+
+summary(res_nonmiss_pre)#second part is HR and CI of HR
+
+uni_pre_non <- coxph(Surv(obs_time,status)~Pre_Op_NNNS_attention_score,data = nonmiss_pre)
+summary(uni_pre_non)
+
+cz_non_pre <- cox.zph(res_nonmiss_pre)
+print(cz_non_pre)
+plot(cz_non_pre)
+#post
+nonmiss_post <- nonmissing[!is.na(nonmissing$Post_Op_NNNS_attention_score),]
+dim(nonmiss_post) #74
+res_nonmiss_post <- with(nonmiss_post,coxph(Surv(obs_time,status)~Female+Genetic_Syndrome_or_Chromosomal_Abnormality+
+                                   Age_at_Surgery_days+Cardiac_Anatomy+Post_Op_NNNS_attention_score+
+                                   Length_of_intubation_days+Length_of_Stay_days))
+
+summary(res_nonmiss_post)#second part is HR and CI of HR
+
+cz_non_post <- cox.zph(res_nonmiss_post)
+print(cz_non_post)
+plot(cz_non_post)
+```
+
