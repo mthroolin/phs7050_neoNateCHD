@@ -30,7 +30,46 @@ library(mice) # imputation
 nnns0 <- read.csv("../NNNS_score_data.csv")
 ```
 
-## Data cleaning
+## Introduction
+
+This study aims to understand the effect neonatal attention on feeding outcomes among newborns undergoing cardiac surgery. 
+Specifically, we are interested associations between attention scores before and after surgery, 
+and the percent of oral feeds at discharge and time to achieving full oral feeds. 
+This study uses data from 129 neonates with CHD admitted to the cardiac intensive care unit. 
+The data and research questions present certain methodological challenges, which we discuss in our proposed analysis.
+
+## Investigator's Description
+
+Neurodevelopmental delay in neonates with congenital heart disease (CHD) is one of many factors contributing to
+difficulty in achieving full oral feeds following neonatal cardiac surgery. 
+Neonates undergoing CHD surgery often have abnormal neurobehavioral. 
+Poor attention has emerged as a hallmark of neurobehavioral state in neonates with CHD. 
+The Neonatal Intensive Care Unit Network Neurobehavioral Scale, or NNNS, 
+is a standardized assessment for evaluating neonatal neurobehavior attention across 13 subdomains, including attention.
+
+## Research Objectives
+
+We are interested in answering the following two questions:
+
+1. Are lower pre- or post-op attention scores associated with lower % oral feeds at discharge?
+
+2. Are lower pre- or post-op attention scores associated with longer time to achieve full oral feeds after cardiac surgery.
+
+## Project Endpoints
+
+*	Present summaries of the pattern of missing data and of the relationships among relevant variables to help decide on one or more appropriate approaches for dealing with missing data.
+
+*	Investigate distributions of key analytic variables to help determine appropriate statistical models.
+
+*	Fit the appropriate statistical models to address the primary research questions, using an appropriate strategy to handle missing data.
+
+* Provide appropriate evaluations of the assumptions of the statistical models.
+
+*	Provide appropriate sensitivity analyses.
+
+* Provide publication ready tables and figures which you believe are appropriate for the manuscript (typically 5-6 total tables and figures).
+
+## Data
 
 Data file: "NNNS_score_data.csv";
 Data dictionary: "NNNS_score_data_dictionary.xlsx".
@@ -195,6 +234,7 @@ data.frame(nmiss = colSums(is.na(nnns |> select(-starts_with("Date"))))) |>
   mutate(variable = dict_nnns$label[match(variable, dict_nnns$name)]) |>
   # sort by percentage
   arrange(desc(perc)) |>
+  setNames(c("Variable", "Number of missing", "Percentage of missing")) |>
   kable() |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) |>
   scroll_box(height = "300px")
@@ -330,6 +370,38 @@ nnns |>
   modify_caption("Characteristics distribution by missing percentage of oral feed at discharge")
 
 
+nnns |>
+  mutate(Percent_of_feeds_taken_by_mouth_at_discharge_missing = factor(is.na(Percent_of_feeds_taken_by_mouth_at_discharge), levels = c(F, T), labels = c("Non-missing", "Missing"))) |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge_missing,
+    GI_Complication, Post_Op_NNNS_Stress_Score, Post_Op_NNNS_Asymmetry_Score
+  ) |>
+  label_data() |>
+  tbl_summary(
+    by = Percent_of_feeds_taken_by_mouth_at_discharge_missing,
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing = "no"
+  ) |>
+  add_p()
+
+
+nnns |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge,
+    Pre_Op_NNNS_attention_score, Post_Op_NNNS_attention_score,
+    all_of(basevar)
+  ) |>
+  label_data() |>
+  tbl_summary(
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing = "no"
+  ) |>
+  # add N(%) of missing values
+  add_n(statistic = "{n_miss} ({p_miss}%)") |>
+  # change name of the statistic column
+  modify_header(n ~ "**Missing (%)**") |>
+  # move missing (%) to the last column
+  modify_table_body(~ .x |> relocate(n, .after = stat_0))
 ```
 
 #### Pre-op attention
