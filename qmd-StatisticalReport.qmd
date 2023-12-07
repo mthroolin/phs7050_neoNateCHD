@@ -17,10 +17,6 @@ execute:
   cache: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(warning = F, message = F, echo = F,cache = T, fig.align = 'center', comment = NA)
-```
-
 ```{r load packages}
 library(tidyverse)
 library(gtsummary)
@@ -1527,8 +1523,8 @@ pooled_post_op |> autocorr.plot()
 ### Linearity Check {#sec-zoiblinear}
 
 ```{r zoib_linearity}
-#| fig.height: 40
-#| fig.width: 12
+#| fig.height: 6
+#| fig.width: 6
 
 post_pred <- readRDS("Michael_work/data/post_op_pred.rds")
 pre_pred <- readRDS("Michael_work/data/pre_op_pred.rds")
