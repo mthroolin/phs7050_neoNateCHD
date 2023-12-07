@@ -1523,8 +1523,6 @@ pooled_post_op |> autocorr.plot()
 ### Linearity Check {#sec-zoiblinear}
 
 ```{r zoib_linearity}
-#| fig.height: 6
-#| fig.width: 6
 
 post_pred <- readRDS("Michael_work/data/post_op_pred.rds")
 pre_pred <- readRDS("Michael_work/data/pre_op_pred.rds")
