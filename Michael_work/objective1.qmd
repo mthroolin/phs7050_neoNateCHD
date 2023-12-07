@@ -1,5 +1,6 @@
 ---
 title: "Objective 1"
+number-sections: true
 format:
   html:
     embed-resources: true
@@ -23,6 +24,8 @@ library(ggpubr)
 library(kableExtra)
 library(mice)
 library(parallel)
+library(ggplot2)
+library(glue)
 
 theme_set(theme_pubr(legend = "bottom"))
 ```
@@ -57,7 +60,7 @@ The model was fit in a Bayesian framework using the zoib package in R. Diffuse n
 
 When pooling the multiple imputation of the twenty datasets together, the models provide little to no evidence that a relationship exists between percent oral feed at discharge and the pre- or post-op attention scores. The results of both models, one including pre-op attention scores and the other including post-op attention scores, were exponentiated to be on the odds ratio scale and are shown in @tbl-zoib_summmary_prekable and @tbl-zoib_summmary_postkable respectively. For the dichotomous attention score models, there was evidence of a relationship between the the probability of having full oral feeds at discharge and pre-operation attention scores (see @tbl-zoibcatpre), yet there was no evidence of the association existing with post-operation scores (@tbl-zoibcatpost).
 
-For a posterior predictive check, nine replicated samples were drawn from the posterior distribution and compared with the original data on percent oral feed at discharge (Figures @fig-ppcpre and @fig-ppcpost, @fig-zoibcatpreppc, @fig-zoibcatpostppc). The histograms of the replicated samples do not reflect the clear zero-inflation of the original data. Further analysis in a thousand draws of the posterior distribution showed that the maximum or minimum (zero and one) were never drawn. A similar check conditioning on the outcome being between zero and one also yielded little confidence in conditional model fit. The poor model fit to our data suggests our results to be highly suspect. Future work should address these concerns, potentially by changing the covariates in the original model- such as adding a design matrix for modeling the log variance- or selecting another model entirely.
+To check the assumption of linearity we plotted the residuals versus predicted outcome, which showed strong linearity (see @sec-zoiblinear). For a posterior predictive check, nine replicated samples were drawn from the posterior distribution and compared with the original data on percent oral feed at discharge (Figures @fig-ppcpre and @fig-ppcpost, @fig-zoibcatpreppc, @fig-zoibcatpostppc). The histograms of the replicated samples do not reflect the clear zero-inflation of the original data. Further analysis in a thousand draws of the posterior distribution showed that the maximum or minimum (zero and one) were never drawn. A similar check conditioning on the outcome being between zero and one also yielded little confidence in conditional model fit. The poor model fit to our data suggests our results to be highly suspect. Future work should address these concerns, potentially by changing the covariates in the original model- such as adding a design matrix for modeling the log variance- or selecting another model entirely.
 
 
 ```{r zoib_readin}
@@ -165,8 +168,8 @@ saveRDS(model_results, "post_op_models.rds")
 
 tictoc::toc()
 
-post_op_models =readRDS(file="post_op_models.rds")
-pre_op_models =readRDS(file="pre_op_models.rds")
+post_op_models =readRDS(file="data/data/post_op_models.rds")
+pre_op_models =readRDS(file="data/data/pre_op_models.rds")
 
 post_op_coeff = list()
 pre_op_coeff = list()
@@ -183,8 +186,8 @@ saveRDS(pooled_post_op, "pooled_post_op.rds")
 ```
 
 ```{r zoib_summarytables}
-pooled_pre_op =readRDS("pooled_pre_op.rds")
-pooled_post_op=readRDS("pooled_post_op.rds")
+pooled_pre_op =readRDS("data/pooled_pre_op.rds")
+pooled_post_op=readRDS("data/pooled_post_op.rds")
 
 
 summary_pooled_pre_op = pooled_pre_op |> summary()
@@ -269,7 +272,7 @@ post_kable
 
 ```{r zoib_ppc_pre_histogram}
 #| eval: false
-pre_op_pred = readRDS("pre_op_pred.rds")
+pre_op_pred = readRDS("data/pre_op_pred.rds")
 
 pooled_pre_op_pred =pre_op_pred |> runjags::combine.mcmc(collapse.chains = TRUE)
 
@@ -285,16 +288,15 @@ dat[[1]]$Percent_of_feeds_taken_by_mouth_at_discharge |>
   hist(main = "Histogram of Percent Oral Feeds",xlab = "Percent Oral Feeds")
 ```
 
+![Posterior Predictive Samples, Pre-Op Multiple Imputation (20 Datasets) Model](data/ppc_pre_op.png){#fig-ppcpre}
 
-![Posterior Predictive Samples, Pre-Op Multiple Imputation (20 Datasets) Model](ppc_pre_op.png){#fig-ppcpre}
-
-![Posterior Predictive Samples, Post-Op Multiple Imputation (20 Datasets) Model](ppc_post_op.png){#fig-ppcpost}
+![Posterior Predictive Samples, Post-Op Multiple Imputation (20 Datasets) Model](data/ppc_post_op.png){#fig-ppcpost}
 
 ```{r zoib_ppc_post_histogram}
 #| eval: false
 
 # CODE HISTOGRAM
-post_op_pred = readRDS("post_op_pred.rds")
+post_op_pred = readRDS("data/post_op_pred.rds")
 
 pooled_post_op_pred =post_op_pred |> runjags::combine.mcmc(collapse.chains = TRUE)
 
@@ -407,8 +409,8 @@ tictoc::toc()
 ```
 
 ```{r zoib_cat_load}
-post_model_results = readRDS("cat_post_op_model.rds")
-pre_model_results = readRDS("cat_pre_op_model.rds")
+post_model_results = readRDS("data/cat_post_op_model.rds")
+pre_model_results = readRDS("data/cat_pre_op_model.rds")
 
 summary_pre_op = pre_model_results$coeff |> summary()
 summary_post_op = post_model_results$coeff |> summary()
@@ -483,21 +485,21 @@ post_kable = post_df |>
 #| tbl-cap: "Odds Ratio of Percent Oral Feed Model Results (Pre-Operation)"
 pre_kable
 ```
-```{r}
+```{r zoib_catpost}
 #| label: tbl-zoibcatpost
 #| tbl-cap: "Odds Ratio of Percent Oral Feed Model Results (Post-Operation)"
 post_kable
 ```
 
-![Posterior Predictive Samples, Pre-Op Dichotomous Model](zoib_cat_pre_ppc.png){#fig-zoibcatpreppc}
+![Posterior Predictive Samples, Pre-Op Dichotomous Model](data/zoib_cat_pre_ppc.png){#fig-zoibcatpreppc}
 
-![Posterior Predictive Samples, Post-Op Dichotomous Model](zoib_cat_post_ppc.png){#fig-zoibcatpostppc}
+![Posterior Predictive Samples, Post-Op Dichotomous Model](data/zoib_cat_post_ppc.png){#fig-zoibcatpostppc}
 
 # Appendix
 
 ## Check Convergence of MCMC Chains
 
-### Traceplots
+### Traceplots {#sec-zoibtrace}
 
 #### Pre-op 20 imputations model
 ```{r appendix_zoib1}
@@ -511,7 +513,7 @@ pooled_pre_op |> traceplot()
 pooled_post_op |> traceplot()
 ```
 
-### Autocorrelation plots
+### Autocorrelation plots {#sec-zoibautocorr}
 
 #### Pre-op 20 imputations model
 ```{r appendix_zoib3}
@@ -524,12 +526,124 @@ pooled_pre_op |> autocorr.plot()
 pooled_post_op |> autocorr.plot()
 ```
 
-### Posterior Predictive Check
+### Linearity Check {#sec-zoiblinear}
+
+```{r zoib_linearity}
+post_pred <- readRDS("data/post_op_pred.rds")
+pre_pred <- readRDS("data/pre_op_pred.rds")
+post_res <- readRDS("data/post_op_res.rds")
+pre_res <- readRDS("data/pre_op_res.rds")
+
+post_pdf <- rep(0,115)
+post_rdf <- rep(0,115)
+for (i in 1:20){
+    preds <- rep(0,115)
+    resids <- rep(0,115)
+    
+    prd_df1 <- cbind(post_pred[[i]][[1]])
+    prd_df2 <- cbind(post_pred[[i]][[2]])
+    prd_df3 <- cbind(post_pred[[i]][[3]])
+    prd_df4 <- cbind(post_pred[[i]][[4]])
+    
+    res_df1 <- cbind(post_res[[i]][[1]])
+    res_df2 <- cbind(post_res[[i]][[2]])
+    res_df3 <- cbind(post_res[[i]][[3]])
+    res_df4 <- cbind(post_res[[i]][[4]])
+    
+    for (j in 1:115){
+        prd_col1 <- prd_df1[,j]
+        prd_col2 <- prd_df2[,j]
+        prd_col3 <- prd_df3[,j]
+        prd_col4 <- prd_df4[,j]
+        
+        res_col1 <- res_df1[,j]
+        res_col2 <- res_df2[,j]
+        res_col3 <- res_df3[,j]
+        res_col4 <- res_df4[,j]
+        
+        preds[j] <- mean(c(prd_col1,prd_col2,prd_col3,prd_col4))
+        #print(i,j,preds[j])
+        resids[j] <- mean(c(res_col1,res_col2,res_col3,res_col4))
+    }
+    post_pdf <- cbind(post_pdf,preds)
+    post_rdf <- cbind(post_rdf,resids)
+}
+
+# Post operation attention model linearity plots
+for (i in 1:20){
+    pst_df <- cbind(pred=post_pdf[,i+1],resid=post_rdf[,i+1])
+    pst_df <- as.data.frame(pst_df)
+    post_plot <- ggplot(pst_df,aes(x=resid,y=pred))+
+        geom_point(alpha=0.7) +
+        labs(x="Residuals",y='Predicted Outcome')
+
+    disp <- post_plot + 
+        stat_smooth(geom='smooth',method='lm',formula=y~splines::ns(x,knots=c())) + 
+        ggtitle(glue("Linearity of Residuals Post Attention Model Imputed Dataset {i}"))+ 
+      theme(plot.title = element_text(face='bold',hjust = 0.5))
+    print(disp)
+
+}
+
+pre_pdf <- rep(0,115)
+pre_rdf <- rep(0,115)
+for (i in 1:20){
+    preds <- rep(0,115)
+    resids <- rep(0,115)
+    
+    prd_df1 <- cbind(pre_pred[[i]][[1]])
+    prd_df2 <- cbind(pre_pred[[i]][[2]])
+    prd_df3 <- cbind(pre_pred[[i]][[3]])
+    prd_df4 <- cbind(pre_pred[[i]][[4]])
+    
+    res_df1 <- cbind(pre_res[[i]][[1]])
+    res_df2 <- cbind(pre_res[[i]][[2]])
+    res_df3 <- cbind(pre_res[[i]][[3]])
+    res_df4 <- cbind(pre_res[[i]][[4]])
+    
+    for (j in 1:115){
+        prd_col1 <- prd_df1[,j]
+        prd_col2 <- prd_df2[,j]
+        prd_col3 <- prd_df3[,j]
+        prd_col4 <- prd_df4[,j]
+        
+        res_col1 <- res_df1[,j]
+        res_col2 <- res_df2[,j]
+        res_col3 <- res_df3[,j]
+        res_col4 <- res_df4[,j]
+        
+        preds[j] <- mean(c(prd_col1,prd_col2,prd_col3,prd_col4))
+        #print(i,j,preds[j])
+        resids[j] <- mean(c(res_col1,res_col2,res_col3,res_col4))
+    }
+    pre_pdf <- cbind(pre_pdf,preds)
+    pre_rdf <- cbind(pre_rdf,resids)
+}
+
+# Pre-operation attention model linearity plots
+for (i in 1:20){
+    pst_df <- cbind(pred=post_pdf[,i+1],resid=post_rdf[,i+1])
+    pst_df <- as.data.frame(pst_df)
+    post_plot <- ggplot(pst_df,aes(x=resid,y=pred))+
+        geom_point(alpha=0.7) +
+        labs(x="Residuals",y='Predicted Outcome')
+
+    disp <- post_plot + 
+        stat_smooth(geom='smooth',method='lm',formula=y~splines::ns(x,knots=c())) + 
+        ggtitle(glue("Linearity of Residuals Pre Attention Model Imputed Dataset {i}"))+ 
+      theme(plot.title = element_text(face='bold',hjust = 0.5))
+    print(disp)
+
+}
+```
+
+### Posterior Predictive Check {#sec-zoibppc}
+
 ```{r zoib_ppc_quantiles}
 #| cache: true
-pre_op_pred = readRDS("pre_op_pred.rds")
+pre_op_pred = readRDS("data/pre_op_pred.rds")
 pooled_pre_op_pred =pre_op_pred |> runjags::combine.mcmc(collapse.chains = TRUE)
-post_op_pred = readRDS("post_op_pred.rds")
+post_op_pred = readRDS("data/post_op_pred.rds")
 pooled_post_op_pred =post_op_pred |> runjags::combine.mcmc(collapse.chains = TRUE)
 
 #| cache: true
