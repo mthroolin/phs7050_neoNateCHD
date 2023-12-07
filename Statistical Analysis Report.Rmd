@@ -23,7 +23,7 @@ library(kableExtra)
 library(VIM) # visualization
 library(mice) # imputation
 
-# library(zoib)
+library(zoib)
 library(GGally)
 library(ggpubr)
 library(parallel)
@@ -913,7 +913,7 @@ as they are important demographic factors that are often controlled for in the l
 Lastly, we chose to run two separate models, one with pre-operation attention scores and the other with
 post-operation attention scores as covariates to answer the research question.
 
-![]("Obj1-Univariate.png")
+![](Obj1-Univariate.png)
 
 The zero-inflated model that was fit can be written as:
 $$
@@ -1413,15 +1413,22 @@ Within the multivariate models, three groups of pre-/post-operative scores were 
 
 The cumulative incidences curve was generated for the observational time period and the probability of neonate achieving the oral feeds without adjusting for any covariates is shown in figure:
 
+![](Yidan_work/Picture1.png)
+
 The univariate cox regression model indicates that higher preoperative NNNS attention score was associated with a shorter time to achieve full oral feeds(HR=1.34, 95% CI 1.07, 1.68, P value=0.01), it is also shown that patients with genetic syndrome will have an increase in time to achieving full oral feeds, additionally, with one day increasing in ventilator days, there will be 15% significantly increasing in time to achieving full oral feeds. In consideration with the univariate analysis, we adjusted for the patients’ sex, their genetic syndrome, the age at surgery, cardiac anatomy, intubation days in the multivariates model. We also adjusted for the length of stay in days, since we found that the date of the achieving full oral feeds or being identified as not yet having full oral feed was recorded after the patients got discharged and gathered from their clinics visit notes, so length of stay is meaningful to account for in respect to our analysis[1]. 
+
+![](Yidan_work/Table1.png)
 
 The multivariable analysis for imputed continuous attention scores pooled results from the analysis of 20 imputed datasets. A higher preoperative attention score tends to be associated with a longer time to achieve full oral feeds (HR=0.67, 95% CI 0.31–1.45, p-value=0.34), while a higher postoperative attention score is linked with a shorter time to achieve full oral feeds (HR=1.61, 95% CI 0.79–3.28, p-value=0.22), adjusting for all other covariates.
 
 In the case of dichotomized attention scores, the results show that a high preoperative attention score is associated with a trend toward a shorter time to achieve full oral feeds (HR=1.44, 95% CI 0.91–2.29, p-value=0.12). Conversely, a high postoperative attention score tends to be linked with a longer time to achieve full oral feeds (HR=0.70, 95% CI 0.44–1.10, p-value=0.12), adjusting for all other covariates.
 
-![]()
+![](Yidan_work/Table2.png)
+
 
 Finally, in the multivariable analysis for those with complete pre- and post-operative attention scores, the analysis of preoperative attention scores (n=53) suggests that a higher attention score is associated with an increasing time to achieve full oral feeds (HR=0.45, 95% CI 0.18–1.12, p-value=0.08), adjusting for other covariates. In the analysis of postoperative scores (n=74), a higher attention score is linked to a significantly shorter time to achieve full oral feeds (HR=2.21, 95% CI 1.02–4.82, p-value=0.04), adjusting for other covariates.
+
+![](Yidan_work/Table3.png)
 
 All Cox proportional hazard regression models underwent assessment for the proportional hazard assumption. The examination, conducted both individually for each covariate and globally, affirmed the satisfaction of these assumptions.
 
