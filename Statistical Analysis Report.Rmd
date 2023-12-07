@@ -1,0 +1,316 @@
+---
+title: "The Impact of Neurobehavior on Feeding Outcomes in Neonates with CHD"
+author: "Brenna Kelly, Haojia Li, Yidan Zhang, Michael Throolin, Julia Bohman"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = F, message = F, cache = F, fig.align = 'center', comment = NA)
+```
+
+```{r load packages}
+library(tidyverse)
+library(gtsummary)
+library(knitr)
+library(kableExtra)
+# handle missing data
+library(VIM) # visualization
+library(mice) # imputation
+```
+
+```{r}
+# read in raw data
+nnns0 <- read.csv("NNNS_score_data.csv")
+# clean up variable names
+# remove the dots at the end of variable names
+colnames(nnns0) <- gsub("\\.+$", "", colnames(nnns0))
+# replace all the dots in variable names with underscores
+colnames(nnns0) <- gsub("\\.+", "_", colnames(nnns0))
+
+nnns <- nnns0 |> 
+  filter(
+    # exclude neurologic or airway anomaly
+    Neurologic_Complication == 0, AirwayAnomalyYN == 0,
+    # include infants from birth to 4 weeks old
+    # there are two outliers with age at surgery > 30 days
+    Age_at_Surgery_days <= 30
+  )
+```
+
+## Introduction
+
+This study aims to understand the effect neonatal attention on feeding outcomes among newborns undergoing cardiac surgery. 
+Specifically, we are interested in the associations between attention scores before and after surgery, 
+and the percent of oral feeds at discharge and time to achieving full oral feeds. 
+This study uses data from 129 neonates with CHD admitted to the cardiac intensive care unit. 
+The data and research questions present certain methodological challenges, which we discuss in our proposed analysis.
+
+## Investigator's Description
+
+Neurodevelopmental delay in neonates with congenital heart disease (CHD) is one of many factors contributing to
+difficulty in achieving full oral feeds following neonatal cardiac surgery. 
+Neonates undergoing CHD surgery often have abnormal neurobehavioral. 
+Poor attention has emerged as a hallmark of neurobehavioral state in neonates with CHD. 
+The Neonatal Intensive Care Unit Network Neurobehavioral Scale, or NNNS, 
+is a standardized assessment for evaluating neonatal neurobehavior attention across 13 subdomains, including attention.
+
+## Research Objectives
+
+We are interested in answering the following two questions:
+
+1. Are lower pre- or post-op attention scores associated with lower % oral feeds at discharge?
+
+2. Are lower pre- or post-op attention scores associated with longer time to achieve full oral feeds after cardiac surgery.
+
+## Project Endpoints
+
+*	Present summaries of the pattern of missing data and of the relationships among relevant variables to help decide on one or more appropriate approaches for dealing with missing data.
+
+*	Investigate distributions of key analytic variables to help determine appropriate statistical models.
+
+*	Fit the appropriate statistical models to address the primary research questions, using an appropriate strategy to handle missing data.
+
+* Provide appropriate evaluations of the assumptions of the statistical models.
+
+*	Provide appropriate sensitivity analyses.
+
+* Provide publication ready tables and figures which you believe are appropriate for the manuscript (typically 5-6 total tables and figures).
+
+## Data
+
+Data was taken from a single center retrospective cohort study and contains information on neonates born with CHD, thus necessitating neonatal cardiac surgery. 
+NNNS scores were obtained both before and after surgery, though not every subject has a score for both time points. 
+129 neonates with CHD were admitted to the cardiac intensive care unit from 8/2015-10/2017. 
+We exclude `r sum(nnns0$Neurologic_Complication)` neonates with neurologic compliance, 
+`r sum(nnns0$AirwayAnomalyYN)` with airway anomalies, 
+and `r sum(nnns0$Age_at_Surgery_days > 30)` neonates greater than 30 days of age, 
+leaving `r nrow(nnns)` neonates in our dataset.
+
+The primary outcomes of interest is the percent of oral feeds. 
+It has `r sum(is.na(nnns$Percent_of_feeds_taken_by_mouth_at_discharge))` missing values.
+As the histogram below shows, the percent of oral feed is bounded by [0,1], 
+with a substantial fraction of the data falling at the boundaries 
+(`r sum(nnns$Percent_of_feeds_taken_by_mouth_at_discharge == 0, na.rm = T)` exact 0's and 
+`r sum(nnns$Percent_of_feeds_taken_by_mouth_at_discharge == 1, na.rm = T)` exact 1's).
+
+```{r}
+# distribution of percent of oral feeds
+hist(
+  nnns$Percent_of_feeds_taken_by_mouth_at_discharge*100,
+  main = "Distribution of Percent of Oral Feeds at Discharge",
+  xlab = "Percent of Oral Feeds at Discharge"
+)
+```
+
+The secondary outcome of interest is time to achieve full oral feeds.
+The time-to-event outcome will be generated from 3 date variables: 
+start date of oral feed, date of reaching full oral feeds, and date identified as not yet full oral feed.
+Non-missing in date identified as not yet full oral feed indicates censoring, that is, the binary event flag equals 0, 
+while non-missing in date of reaching full oral feeds indicates event, that is, the binary event flag equals 1.
+The time variable will be calculated as the difference between either of the two dates above and the start date of oral feed. 
+There are `r sum(nnns$Date_PO_feeds_started != "" & nnns$Date_Reaching_Full_PO != "")` neonates with event, 
+and `r sum(nnns$Date_PO_feeds_started != "" & nnns$Date_Identified_as_not_yet_full_PO != "")` neonates with censoring. 
+`r sum(nnns$Date_PO_feeds_started == "" | (nnns$Date_Reaching_Full_PO == "" & nnns$Date_Identified_as_not_yet_full_PO == ""))` 
+neonates have no information on time to event and will be excluded only for survival analysis.
+
+Variables of interest include:
+
+* Demographics: Age at surgery, Sex;
+* Innate Characteristics: Genetic syndrome, Prematurity, Cardiac anatomy;
+* Surgical Outcomes: Length of intubation (days), Length of stay (days), Extubation failure, Gastrointestinal complications.
+
+There are 24 variables for the 12 non-attention subdomains of NNNS before and after surgery, 
+which will be considered as auxiliary variables for missing data imputation only.
+
+```{r}
+nnns <- nnns |> 
+  
+  mutate(
+    
+    # some binary variables have values of 1/2 or Y/N, recode them to 0/1
+    Female = as.integer(sex_1_M_2_F == 2),
+    Premature = as.integer(Premature == 1),
+    Extubation_failure = as.integer(Extubation_failure == "Y"),
+    
+    # for model building purposes, combine the 2 levels w/o arch obstruction in cardiac anatomy
+    Cardiac_Anatomy = factor(case_when(
+      Cardiac_Anatomy %in% c(1,3) ~ 1,
+      Cardiac_Anatomy == 2 ~ 2,
+      Cardiac_Anatomy == 4 ~ 3
+    ), levels = 1:3, labels = c("W/o arch obstruction", "Single ventricle w/ arch obstruction", "Two ventricle w/ arch obstruction"))
+    
+  ) |>
+  
+  # convert date variables to date class
+  mutate_at(
+    vars("Date_PO_feeds_started", "Date_Reaching_Full_PO", "Date_Identified_as_not_yet_full_PO"), 
+    as_date, format = "%m/%d/%Y"
+  ) |> 
+  
+  # drop unnecessary variables
+  select(!c(
+    "sex_1_M_2_F", # use Female instead
+    "Intubated_Pre_operatively", "bypass_used", "bypass_time_min", # not of interest 
+    "Neurologic_Complication", "AirwayAnomalyYN" # already excluded
+  )) 
+
+# names and labels of variables
+dict_nnns <- data.frame(
+  
+  name = c(
+    # primary outcome
+    "Percent_of_feeds_taken_by_mouth_at_discharge",
+    # predictor of interest
+    "Pre_Op_NNNS_attention_score", "Post_Op_NNNS_attention_score",
+    # 8 infant/surgery characteristics
+    "Age_at_Surgery_days", "Female",
+    "Genetic_Syndrome_or_Chromosomal_Abnormality", "Cardiac_Anatomy",
+    "GI_Complication", "Length_of_Stay_days",
+    "Length_of_intubation_days", "Extubation_failure",
+    # 12 pre-op non-attention NNNS scores
+    "Pre_Op_NNNS_habituation_score", "Pre_Op_NNNS_handling_score",
+    "Pre_Op_NNNS_Quality_of_Movement_Score", "Pre_Op_NNNS_Regulation_Score",
+    "Pre_Op_NNNS_Non_Optimal_Reflexes_Score", "Pre_Op_NNNS_Stress_Score",
+    "Pre_Op_NNNS_Arousal_Score", "Pre_Op_NNNS_Hypertonic_Score",
+    "Pre_Op_NNNS_Hypotonic_Score", "Pre_Op_NNNS_Asymmetry_Score",
+    "Pre_Op_NNNS_Excitability_Score", "Pre_Op_NNNS_Lethargy_Score",
+    # 12 post-op non-attention NNNS scores
+    "Post_Op_NNNS_habituation_score", "Post_Op_NNNS_handling_score",
+    "Post_Op_NNNS_Quality_of_Movement_Score", "Post_Op_NNNS_Regulation_Score",
+    "Post_Op_NNNS_Non_Optimal_Reflexes_Score", "Post_Op_NNNS_Stress_Score",
+    "Post_Op_NNNS_Arousal_Score", "Post_Op_NNNS_Hypertonic_Score",
+    "Post_Op_NNNS_Hypotonic_Score", "Post_Op_NNNS_Asymmetry_Score",
+    "Post_Op_NNNS_Excitability_Score", "Post_Op_NNNS_Lethargy_Score"
+  ), 
+  
+  label = c(
+    # primary outcome
+    "Percentage of oral feed at discharge",
+    # predictor of interest
+    "Pre-op attention", "Post-op attention",
+    # 8 infant/surgery characteristics
+    "Age at surgery in days", "Female",
+    "Genetic Syndrome / Chromosomal Abnormality", "Cardiac Anatomy",
+    "Gastrointestinal Complication", "Length of Stay in days", 
+    "Length of intubation in days", "Extubation failure", 
+    # 12 pre-op non-attention NNNS scores
+    "Pre-op habituation", "Pre-op handling", "Pre-op quality of movement", 
+    "Pre-op regulation", "Pre-op non-optimal reflexes", "Pre-op stress", 
+    "Pre-op arousal", "Pre-op hypertonic", "Pre-op hypotonic", 
+    "Pre-op asymmetry", "Pre-op excitability", "Pre-op lethargy", 
+    # 12 post-op non-attention NNNS scores
+    "Post-op habituation", "Post-op handling", "Post-op quality of movement",
+    "Post-op regulation", "Post-op non-optimal reflexes", "Post-op stress", 
+    "Post-op arousal", "Post-op hypertonic", "Post-op hypotonic", 
+    "Post-op asymmetry", "Post-op excitability", "Post-op lethargy" 
+  ))
+
+# create sets of variables for the convenience of calling them later
+basevar <- c(
+  "Age_at_Surgery_days", "Female",
+  "Genetic_Syndrome_or_Chromosomal_Abnormality", "Cardiac_Anatomy",
+  "GI_Complication", "Length_of_Stay_days",
+  "Length_of_intubation_days", "Extubation_failure"
+)
+preop_nnns <- dict_nnns$name[grepl("Pre_Op_NNNS", dict_nnns$name)]
+postop_nnns <- dict_nnns$name[grepl("Post_Op_NNNS", dict_nnns$name)]
+
+# function to label variables
+label_data <- function(data) {
+  colnames(data) <- ifelse(
+    colnames(data) %in% dict_nnns$name, 
+    dict_nnns$label[match(colnames(data), dict_nnns$name)],
+    colnames(data)
+  )
+  return(data)
+}
+```
+
+The table below summarizes the distribution of primary outcome, predictors, and other variables of interest. 
+We used median (IQR) to summarize continuous variables and N(%) to summarize categorical variables. 
+The median percentage of oral feed at discharge was 6% (0%, 34%), which matches its distribution with a large proportion of zeros. 
+The post-op attention score was slightly higher than the pre-op attention score (median 4.3 vs. 3.4). 
+The median age at surgery was 7 days. 
+`r round(mean(nnns$Female)*100)`% of the infants were females. 
+`r round(mean(nnns$Genetic_Syndrome_or_Chromosomal_Abnormality)*100)`% of the infants had genetic syndrome,
+and `r round(100 - mean(nnns$Cardiac_Anatomy == "W/o arch obstruction")*100)`% of the infants had single or double ventricle with arch obstruction. 
+The occurrence of gastrointestinal complication and extubation failure were relatively low 
+(`r round(mean(nnns$GI_Complication)*100)`% and `r round(mean(nnns$Extubation_failure)*100)`%, respectively). 
+The median of length of stay and length of intubation were 23 days and 4.9 days, respectively.
+
+The table also shows the number and percentage of missing values for each variable, which will be discussed in the next section.
+
+```{r}
+# descriptive table for variables of interest
+nnns |>
+  select(
+    Percent_of_feeds_taken_by_mouth_at_discharge,
+    Pre_Op_NNNS_attention_score, Post_Op_NNNS_attention_score,
+    all_of(basevar)
+  ) |>
+  label_data() |>
+  tbl_summary(
+    type = list(where(\(x) is.numeric(x) & n_distinct(x) > 2) ~ "continuous"),
+    missing = "no"
+  ) |>
+  # add N(%) of missing values
+  add_n(statistic = "{n_miss} ({p_miss}%)") |>
+  # change name of the statistic column
+  modify_header(n ~ "**Missing (%)**") |>
+  # move missing (%) to the last column
+  modify_table_body(~ .x |> relocate(n, .after = stat_0))
+```
+
+## Missing data
+
+There are 30 variables with missing values in the data set: 
+the primary outcome, percent of oral feed at discharge, 
+the 13 pre-op and 13 post-op NNNS scores, including two predictors of interest (i.e. attention scores), 
+and the 3 date variables. 
+We explained it in the last section that the not all the missingness in the date variables are real missingness, 
+instead, they are indicators of event or censoring, and the real missingness will be directly excluded from the analysis. 
+So we will focus on the missing data in the rest of the variables in this section. 
+The table below summarizes the missing pattern by N(%) of missing values in each variable. 
+It shows that the habituation score has the highest proportion of missing values, with over 70% for both periods. 
+There are `r paste0(sum(is.na(nnns$Pre_Op_NNNS_attention_score)), " (", round(sum(is.na(nnns$Pre_Op_NNNS_attention_score)) / nrow(nnns) * 100, 1), "%)")` missing values in the pre-op attention score, 
+and `r paste0(sum(is.na(nnns$Post_Op_NNNS_attention_score)), " (", round(sum(is.na(nnns$Post_Op_NNNS_attention_score)) / nrow(nnns) * 100, 1), "%)")` missing values in the post-op attention score.
+
+```{r}
+# variables with missing data
+data.frame(nmiss = colSums(is.na(nnns |> select(-starts_with("Date"))))) |>
+  # only keep variables with missing data
+  filter(nmiss > 0) |>
+  # add percentage
+  mutate(perc = round(nmiss / nrow(nnns) * 100, 1)) |>
+  # add variable names
+  rownames_to_column("variable") |>
+  # match variable names with labels
+  mutate(variable = dict_nnns$label[match(variable, dict_nnns$name)]) |>
+  # sort by percentage
+  arrange(desc(perc)) |>
+  setNames(c("Variable", "Number of missing", "Percentage of missing")) |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) |>
+  scroll_box(height = "300px")
+```
+
+&nbsp;
+
+We took two different perspectives for filling in missing data:
+
+First, the multiple imputation approach - we assumed missingness could be explained by the available data (i.e. missing at random, MAR).
+We employed multiple imputation to fill in the missing values and generated 20 imputed data sets. 
+The details of the imputation will be further explained later in this section and 
+the exploration results related to the imputed data sets will be presented in the appendix.
+
+Second, the dichotomization approach - we assumed missingness was informative, and indicative of low attention. 
+For this perspective, we dichotomized the pre and post operation attention scores. 
+Pre-operation attention scores were converted to a binary indicator that was 
+1 for scores above 3, the nearest integer for the first quartile, and 0 for under 3 or missing. 
+Post operation attention scores were converted to a binary indicator that was 
+1 for scores above 4, the nearest integer for the 1st quartile, and 0 for scores below 4 or missing.
