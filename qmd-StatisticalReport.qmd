@@ -1571,6 +1571,7 @@ for (i in 1:20){
 }
 
 # Post operation attention model linearity plots
+disp <- vector(mode = "list", length = 20)
 for (i in 1:20){
     pst_df <- cbind(pred=post_pdf[,i+1],resid=post_rdf[,i+1])
     pst_df <- as.data.frame(pst_df)
@@ -1578,13 +1579,14 @@ for (i in 1:20){
         geom_point(alpha=0.7) +
         labs(x="Residuals",y='Predicted Outcome')
 
-    disp <- post_plot + 
+    disp[[i]] <- post_plot + 
         stat_smooth(geom='smooth',method='lm',formula=y~splines::ns(x,knots=c())) + 
         ggtitle(glue("Linearity of Residuals Post Attention Model Imputed Dataset {i}"))+ 
       theme(plot.title = element_text(face='bold',hjust = 0.5))
-    print(disp)
+    # print(disp)
 
 }
+ggarrange(plotlist = disp, ncol = 2, nrow = 10)
 
 pre_pdf <- rep(0,115)
 pre_rdf <- rep(0,115)
